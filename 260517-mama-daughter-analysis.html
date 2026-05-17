@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>参考曲深度分析 · 【歌名】</title>
+<style>
+  :root {
+    --bg-primary: #0f1117; --bg-card: #1a1d27; --bg-tertiary: #252936; --bg-elevated: #202431; --bg-hover: rgba(255,255,255,0.02);
+    --text-primary: #e4e7ef; --text-secondary: #9ba1b0; --text-muted: #5c6378;
+    --border-color: #2d3143;
+    --accent-red: #ff3366; --accent-green: #00d4aa; --accent-blue: #4488ff; --accent-gold: #ffcc66; --accent-purple: #7c5cff;
+    --accent-pink: #ff7a9a; --accent-teal: #5ed9c8; --accent-orange: #ff9a5c;
+    --shadow-card: 0 18px 44px rgba(0,0,0,0.22); --shadow-soft: 0 10px 24px rgba(0,0,0,0.16);
+    --transition: all 0.2s ease;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; }
+
+  /* ====== 模块化编辑控件 ====== */
+  .modular-hint {
+    background: linear-gradient(135deg, rgba(68,136,255,0.08), rgba(124,92,255,0.05));
+    border: 1px dashed rgba(68,136,255,0.25); border-radius: 12px; padding: 12px 16px; margin-bottom: 16px;
+    font-size: 12px; color: var(--accent-blue); line-height: 1.7; display: flex; align-items: flex-start; gap: 10px;
+  }
+  .modular-hint .hint-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .modular-hint strong { color: var(--accent-gold); }
+
+  .section-type-select {
+    background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px;
+    padding: 6px 10px; font-size: 12px; font-weight: 700; color: var(--text-primary);
+    cursor: pointer; outline: none; font-family: inherit; min-width: 110px;
+  }
+  .section-type-select:focus { border-color: var(--accent-blue); }
+  .section-type-select option { background: var(--bg-tertiary); color: var(--text-primary); }
+
+  .ph-input {
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;
+    padding: 8px 12px; font-size: 13px; color: var(--text-primary); font-family: inherit;
+    width: 100%; outline: none; transition: var(--transition);
+  }
+  .ph-input:focus { border-color: var(--accent-blue); background: rgba(255,255,255,0.05); }
+  .ph-input::placeholder { color: var(--text-muted); font-style: italic; }
+
+  .ph-textarea {
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;
+    padding: 16px 18px; font-size: 14px; line-height: 2; color: var(--text-primary);
+    font-family: inherit; width: 100%; min-height: 200px; resize: vertical; outline: none; transition: var(--transition);
+  }
+  .ph-textarea:focus { border-color: var(--accent-blue); background: rgba(255,255,255,0.05); }
+  .ph-textarea::placeholder { color: var(--text-muted); font-style: italic; }
+
+  .btn-remove {
+    background: rgba(255,51,102,0.1); border: 1px solid rgba(255,51,102,0.2); border-radius: 6px;
+    padding: 4px 10px; font-size: 11px; color: var(--accent-red); cursor: pointer;
+    font-family: inherit; font-weight: 700; opacity: 0.6; transition: var(--transition);
+  }
+  .btn-remove:hover { opacity: 1; background: rgba(255,51,102,0.2); }
+
+  .btn-add {
+    background: rgba(0,212,170,0.08); border: 1.5px dashed rgba(0,212,170,0.3); border-radius: 12px;
+    padding: 10px 20px; font-size: 12px; font-weight: 700; color: var(--accent-green);
+    cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px;
+    transition: var(--transition); margin-top: 10px;
+  }
+  .btn-add:hover { background: rgba(0,212,170,0.15); border-color: var(--accent-green); }
+
+  .tag-input-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .tag-chip {
+    background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 999px;
+    padding: 5px 14px; font-size: 12px; font-weight: 600; color: var(--text-secondary);
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .tag-chip .tag-remove { cursor: pointer; opacity: 0.5; transition: var(--transition); }
+  .tag-chip .tag-remove:hover { opacity: 1; color: var(--accent-red); }
+  .tag-add-input {
+    background: transparent; border: 1px dashed rgba(255,255,255,0.15); border-radius: 999px;
+    padding: 5px 12px; font-size: 12px; color: var(--text-muted); font-family: inherit;
+    width: 100px; outline: none;
+  }
+  .tag-add-input:focus { border-color: var(--accent-blue); color: var(--text-primary); }
+
+  .edit-bar {
+    display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+    background: rgba(0,212,170,0.04); border-radius: 10px; margin-bottom: 16px;
+    font-size: 12px; color: var(--accent-green);
+  }
+  .edit-bar .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-green); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .emotion-type-select {
+    background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 999px;
+    padding: 4px 12px; font-size: 11px; font-weight: 700; color: var(--text-primary);
+    cursor: pointer; outline: none; font-family: inherit;
+  }
+  .emotion-type-select:focus { border-color: var(--accent-purple); }
+  .emotion-type-select option { background: var(--bg-tertiary); color: var(--text-primary); }
+
+  .emotion-tag {
+    display: inline-block; font-size: 10px; padding: 2px 10px; border-radius: 999px;
+    font-weight: 700; margin-left: 8px; flex-shrink: 0;
+  }
+  .type-shrink { background: rgba(232,200,122,0.15); color: var(--accent-gold); }
+  .type-epiphany { background: rgba(68,136,255,0.15); color: var(--accent-blue); }
+  .type-trust { background: rgba(94,217,200,0.15); color: var(--accent-teal); }
+  .type-burst { background: rgba(255,122,154,0.15); color: var(--accent-pink); }
+  .type-golden { background: rgba(255,154,92,0.15); color: var(--accent-orange); }
+  .type-identity { background: rgba(94,217,200,0.15); color: var(--accent-teal); }
+  .type-progressive { background: rgba(232,200,122,0.15); color: var(--accent-gold); }
+  .type-subtle { background: rgba(92,99,120,0.2); color: var(--text-muted); }
+  .type-return { background: rgba(94,217,200,0.15); color: var(--accent-teal); }
+  .type-reconcile { background: rgba(0,212,170,0.15); color: var(--accent-green); }
+  .type-deep { background: rgba(124,92,255,0.15); color: var(--accent-purple); }
+
+  /* ====== 可折叠模块控件 ====== */
+  .module-optional-badge {
+    font-size: 10px; padding: 3px 10px; border-radius: 999px; font-weight: 700;
+    background: rgba(255,204,102,0.12); color: var(--accent-gold); border: 1px solid rgba(255,204,102,0.2);
+    margin-right: 8px; cursor: pointer; transition: var(--transition); user-select: none;
+  }
+  .module-optional-badge:hover { background: rgba(255,204,102,0.2); }
+  .module-optional-badge.closed { background: rgba(255,51,102,0.1); color: var(--accent-red); border-color: rgba(255,51,102,0.2); }
+
+  .module-toggle-btn {
+    background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px;
+    padding: 4px 10px; font-size: 11px; color: var(--text-muted); cursor: pointer;
+    font-family: inherit; font-weight: 700; transition: var(--transition); margin-left: auto;
+  }
+  .module-toggle-btn:hover { color: var(--text-primary); border-color: var(--accent-blue); }
+
+  .module-content { transition: var(--transition); overflow: hidden; }
+  .module-content.collapsed { display: none; }
+
+  .module-skip-hint {
+    background: rgba(255,51,102,0.04); border: 1px dashed rgba(255,51,102,0.15);
+    border-radius: 10px; padding: 10px 14px; margin-bottom: 16px;
+    font-size: 12px; color: var(--text-muted); line-height: 1.6;
+  }
+  .module-skip-hint .skip-icon { color: var(--accent-red); margin-right: 6px; }
+
+  /* ====== 粒子背景 & 导航 ====== */
+  #particles-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+  .template-warning {
+    background: linear-gradient(135deg, rgba(255,51,102,0.12), rgba(255,107,53,0.08));
+    border: 1px dashed rgba(255,51,102,0.4); border-radius: 14px;
+    padding: 14px 20px; margin: 20px 28px 0; font-size: 12px;
+    color: var(--accent-red); font-weight: 700; text-align: center; position: relative; z-index: 10;
+  }
+  .top-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(15,17,23,0.85); backdrop-filter: blur(24px);
+    border-bottom: 1px solid rgba(255,255,255,0.06); padding: 14px 28px; display: flex; align-items: center; gap: 20px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
+  .nav-title { font-size: 16px; font-weight: 800; color: var(--text-primary); }
+  .nav-song { font-size: 13px; color: var(--accent-gold); font-weight: 600; }
+  .nav-meta { font-size: 12px; color: var(--text-muted); margin-left: auto; }
+
+  .main-container { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 90px 28px 60px; }
+
+  /* ====== 表头（图片样式） ====== */
+  .page-header { text-align: center; margin-bottom: 40px; }
+  .page-title-wrap { display: inline-flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 12px; flex-wrap: wrap; }
+  .page-title-prefix { font-size: 38px; font-weight: 900; color: var(--accent-gold); letter-spacing: 0.5px; }
+  .page-title-input {
+    background: transparent; border: none; border-bottom: 2px solid var(--border-color);
+    font-size: 38px; font-weight: 900; color: var(--text-primary); letter-spacing: 0.5px;
+    font-family: inherit; text-align: center; outline: none; padding: 0 8px;
+    min-width: 200px; max-width: 500px; transition: var(--transition);
+  }
+  .page-title-input:focus { border-bottom-color: var(--accent-gold); }
+  .page-title-input::placeholder { color: var(--text-muted); font-style: italic; }
+  .page-title-suffix { font-size: 38px; font-weight: 900; color: var(--text-primary); letter-spacing: 0.5px; }
+
+  .page-subtitle-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .page-subtitle-input {
+    background: transparent; border: none; border-bottom: 1px solid var(--border-color);
+    font-size: 13px; font-weight: 600; color: var(--text-secondary); letter-spacing: 1px;
+    font-family: inherit; text-align: center; outline: none; padding: 2px 4px;
+    transition: var(--transition);
+  }
+  .page-subtitle-input:focus { border-bottom-color: var(--accent-blue); color: var(--text-primary); }
+  .page-subtitle-input::placeholder { color: var(--text-muted); font-style: italic; }
+  .page-subtitle-sep { font-size: 13px; color: var(--text-muted); }
+
+  .capsule-row { display: flex; justify-content: center; gap: 10px; margin-bottom: 36px; flex-wrap: wrap; }
+  .capsule {
+    background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 999px;
+    padding: 6px 16px; font-size: 12px; font-weight: 600; color: var(--text-secondary);
+    display: flex; align-items: center;
+  }
+  .capsule input {
+    background: transparent; border: none; font-family: inherit;
+    font-size: 12px; font-weight: 600; color: var(--text-secondary);
+    text-align: center; outline: none; min-width: 60px;
+  }
+  .capsule input:focus { color: var(--text-primary); }
+  .capsule input::placeholder { color: var(--text-muted); font-style: italic; }
+
+  /* 信息卡片网格（6个） */
+  .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 36px; }
+  .info-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; text-align: left; }
+  .info-label { font-size: 13px; font-weight: 800; color: var(--text-primary); margin-bottom: 10px; }
+  .info-value {
+    font-size: 22px; font-weight: 900; color: var(--accent-gold); margin-bottom: 4px;
+    background: transparent; border: none; border-bottom: 1px solid var(--border-color);
+    font-family: inherit; outline: none; width: 100%; transition: var(--transition);
+  }
+  .info-value:focus { border-bottom-color: var(--accent-gold); }
+  .info-value::placeholder { color: var(--text-muted); font-style: italic; font-weight: 700; }
+  .info-sub {
+    font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px;
+    background: transparent; border: none; font-family: inherit; outline: none; width: 100%;
+  }
+  .info-sub::placeholder { color: var(--text-muted); font-style: italic; }
+  .info-desc {
+    font-size: 12px; color: var(--text-muted); line-height: 1.7;
+    background: transparent; border: 1px solid rgba(255,255,255,0.04); border-radius: 8px;
+    padding: 8px 10px; font-family: inherit; outline: none; width: 100%; resize: vertical; min-height: 60px;
+    transition: var(--transition);
+  }
+  .info-desc:focus { border-color: var(--accent-blue); color: var(--text-primary); }
+  .info-desc::placeholder { color: var(--text-muted); font-style: italic; }
+
+  /* ====== 通用卡片 ====== */
+  .card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 22px; padding: 28px; margin-bottom: 24px; box-shadow: var(--shadow-soft); }
+  .card-header { display: flex; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 8px; }
+  .card-title { font-size: 17px; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 10px; }
+  .card-title .icon { font-size: 18px; }
+
+  /* ====== 歌词区域 ====== */
+  .lyric-section { margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.04); border-radius: 18px; padding: 20px; background: var(--bg-elevated); position: relative; }
+  .lyric-section .section-remove { position: absolute; top: 12px; right: 12px; opacity: 0; transition: var(--transition); }
+  .lyric-section:hover .section-remove { opacity: 1; }
+  .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; padding-right: 30px; }
+  .section-tag { padding: 6px 16px; border-radius: 999px; font-size: 11px; font-weight: 800; }
+  .section-tag.verse { background: rgba(68,136,255,0.15); color: var(--accent-blue); }
+  .section-tag.pre { background: rgba(124,92,255,0.15); color: var(--accent-purple); }
+  .section-tag.chorus { background: rgba(255,204,102,0.15); color: var(--accent-gold); }
+  .section-tag.bridge { background: rgba(0,212,170,0.15); color: var(--accent-green); }
+  .section-tag.intro { background: rgba(255,51,102,0.15); color: var(--accent-red); }
+  .section-tag.outro { background: rgba(255,107,53,0.15); color: #ff6b35; }
+  .section-name-input { flex: 1; min-width: 150px; }
+  .section-meta-input { min-width: 200px; }
+
+  /* ====== 韵脚表格 ====== */
+  .rhyme-table { width: 100%; border-collapse: collapse; }
+  .rhyme-table th { text-align: left; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); padding: 12px 14px; border-bottom: 1px solid var(--border-color); background: var(--bg-elevated); }
+  .rhyme-table td { padding: 12px 14px; font-size: 13px; color: var(--text-primary); border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: top; }
+  .rhyme-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .rhyme-table tr:last-child td { border-bottom: none; }
+  .rhyme-scheme { font-weight: 800; color: var(--accent-gold); font-size: 14px; }
+  .rhyme-example { color: var(--text-secondary); font-size: 12px; margin-top: 4px; }
+
+  /* ====== 意象手法分类 ====== */
+  .imagery-category { margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.04); border-radius: 18px; padding: 20px; background: var(--bg-elevated); position: relative; }
+  .imagery-category .cat-remove { position: absolute; top: 12px; right: 12px; opacity: 0; transition: var(--transition); }
+  .imagery-category:hover .cat-remove { opacity: 1; }
+  .imagery-cat-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; }
+  .imagery-cat-title {
+    font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--accent-gold); background: transparent; border: none;
+    border-bottom: 2px solid var(--border-color); padding: 4px 0;
+    outline: none; font-family: inherit; min-width: 200px; flex: 1;
+  }
+  .imagery-cat-title:focus { border-bottom-color: var(--accent-gold); color: var(--text-primary); }
+  .imagery-cat-title::placeholder { color: var(--text-muted); font-style: italic; }
+  .imagery-item { background: var(--bg-card); border-radius: 14px; padding: 16px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.04); position: relative; }
+  .imagery-item .item-remove { position: absolute; top: 8px; right: 8px; opacity: 0; transition: var(--transition); }
+  .imagery-item:hover .item-remove { opacity: 1; }
+  .imagery-item-title { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; padding-right: 30px; }
+  .imagery-item-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 10px; }
+  .imagery-example-input {
+    background: rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px; border-left: 3px solid var(--accent-gold);
+    padding: 10px 12px; font-size: 12px; color: var(--text-secondary);
+    font-family: inherit; width: 100%; outline: none; resize: vertical; min-height: 50px;
+    line-height: 1.7; margin-top: 8px;
+  }
+  .imagery-example-input:focus { border-color: rgba(255,204,102,0.3); color: var(--text-primary); }
+  .imagery-example-input::placeholder { color: var(--text-muted); font-style: italic; }
+
+  /* ====== 情绪张力控制点 ====== */
+  .emotion-card { background: var(--bg-elevated); border-radius: 16px; padding: 18px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.04); position: relative; }
+  .emotion-card .card-remove { position: absolute; top: 12px; right: 12px; opacity: 0; transition: var(--transition); }
+  .emotion-card:hover .card-remove { opacity: 1; }
+  .emotion-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; padding-right: 30px; }
+  .emotion-position-input {
+    background: transparent; border: none; border-bottom: 1px solid var(--border-color);
+    font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--accent-gold);
+    letter-spacing: 0.5px; font-family: inherit; outline: none; flex: 1; min-width: 150px; padding: 2px 0;
+  }
+  .emotion-position-input:focus { border-bottom-color: var(--accent-gold); color: var(--accent-gold); }
+  .emotion-position-input::placeholder { color: var(--text-muted); font-style: italic; font-weight: 600; }
+  .emotion-sentence-input {
+    font-size: 15px; font-weight: 700; color: var(--text-primary); line-height: 1.5;
+    padding: 10px 14px; background: var(--bg-card); border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.06); width: 100%; font-family: inherit;
+    outline: none; resize: vertical; min-height: 48px; margin-bottom: 10px;
+  }
+  .emotion-sentence-input:focus { border-color: var(--accent-purple); }
+  .emotion-sentence-input::placeholder { color: var(--text-muted); font-style: italic; font-weight: 400; }
+  .emotion-method-input {
+    font-size: 13px; color: var(--text-secondary); line-height: 1.7;
+    padding: 10px 14px; background: rgba(0,0,0,0.08); border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.04); width: 100%; font-family: inherit;
+    outline: none; resize: vertical; min-height: 80px;
+  }
+  .emotion-method-input:focus { border-color: var(--accent-purple); background: rgba(0,0,0,0.12); color: var(--text-primary); }
+  .emotion-method-input::placeholder { color: var(--text-muted); font-style: italic; }
+
+  /* ====== 仿写核心规律 ====== */
+  .rule-card { background: var(--bg-elevated); border-radius: 14px; padding: 16px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.04); position: relative; }
+  .rule-card .rule-remove { position: absolute; top: 8px; right: 8px; opacity: 0; transition: var(--transition); }
+  .rule-card:hover .rule-remove { opacity: 1; }
+  .rule-num {
+    font-size: 11px; font-weight: 800; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 6px; background: transparent; border: none; border-bottom: 1px solid var(--border-color);
+    font-family: inherit; outline: none; width: 120px; padding: 2px 0;
+  }
+  .rule-num:focus { border-bottom-color: var(--accent-gold); }
+  .rule-num::placeholder { color: var(--text-muted); font-style: italic; }
+  .rule-title { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; padding-right: 30px; }
+  .rule-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 10px; }
+  .rule-example-input {
+    background: rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px; border-left: 3px solid var(--accent-gold);
+    padding: 10px 12px; font-size: 12px; color: var(--text-secondary);
+    font-family: inherit; width: 100%; outline: none; resize: vertical; min-height: 50px;
+    line-height: 1.7; margin-top: 8px;
+  }
+  .rule-example-input:focus { border-color: rgba(255,204,102,0.3); color: var(--text-primary); }
+  .rule-example-input::placeholder { color: var(--text-muted); font-style: italic; }
+
+  /* ====== 情绪张力释放时机 ====== */
+  .timing-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
+  .timing-card { background: var(--bg-elevated); border-radius: 14px; padding: 18px; border: 1px solid rgba(255,255,255,0.04); position: relative; }
+  .timing-card .timing-remove { position: absolute; top: 8px; right: 8px; opacity: 0; transition: var(--transition); }
+  .timing-card:hover .timing-remove { opacity: 1; }
+  .timing-input {
+    background: transparent; border: none; border-bottom: 1px solid var(--border-color);
+    font-size: 12px; font-weight: 800; text-transform: uppercase; color: var(--accent-blue);
+    font-family: inherit; outline: none; width: 100%; margin-bottom: 10px; letter-spacing: 0.5px; padding: 2px 0;
+  }
+  .timing-input:focus { border-bottom-color: var(--accent-blue); }
+  .timing-input::placeholder { color: var(--text-muted); font-style: italic; font-weight: 600; }
+  .timing-textarea {
+    font-size: 13px; color: var(--text-secondary); line-height: 1.7;
+    background: transparent; border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 8px; padding: 10px 12px; width: 100%; font-family: inherit;
+    outline: none; resize: vertical; min-height: 80px;
+  }
+  .timing-textarea:focus { border-color: rgba(255,255,255,0.1); color: var(--text-primary); }
+  .timing-textarea::placeholder { color: var(--text-muted); font-style: italic; }
+
+  /* ====== 写作手法 ====== */
+  .pattern-list { display: flex; flex-direction: column; gap: 12px; }
+  .pattern-item { display: flex; gap: 14px; padding: 14px; background: var(--bg-elevated); border-radius: 14px; border: 1px solid rgba(255,255,255,0.04); position: relative; }
+  .pattern-item .item-remove { position: absolute; top: 8px; right: 8px; opacity: 0; transition: var(--transition); }
+  .pattern-item:hover .item-remove { opacity: 1; }
+  .pattern-icon-input { font-size: 20px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: var(--bg-tertiary); border-radius: 10px; flex-shrink: 0; border: none; text-align: center; cursor: pointer; }
+  .pattern-content { flex: 1; }
+
+  /* ====== 仿写总结 ====== */
+  .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .summary-card { background: var(--bg-elevated); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.04); }
+  .summary-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent-gold); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+
+  /* ====== 实例Prompt ====== */
+  .prompt-area {
+    background: var(--bg-elevated); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px;
+    padding: 20px; font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    font-size: 13px; line-height: 2; color: var(--text-primary); width: 100%;
+    outline: none; resize: vertical; min-height: 300px; white-space: pre-wrap;
+    margin-bottom: 16px;
+  }
+  .prompt-area:focus { border-color: var(--accent-blue); }
+  .prompt-area::placeholder { color: var(--text-muted); font-style: italic; }
+  .btn-copy {
+    background: linear-gradient(135deg, rgba(68,136,255,0.15), rgba(124,92,255,0.15));
+    border: 1px solid rgba(68,136,255,0.3); border-radius: 12px;
+    padding: 10px 24px; font-size: 13px; font-weight: 700; color: var(--accent-blue);
+    cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 8px;
+    transition: var(--transition);
+  }
+  .btn-copy:hover { background: linear-gradient(135deg, rgba(68,136,255,0.25), rgba(124,92,255,0.25)); border-color: var(--accent-blue); }
+  .btn-copy.copied { background: rgba(0,212,170,0.15); border-color: var(--accent-green); color: var(--accent-green); }
+
+  @media(max-width: 900px) {
+    .info-grid { grid-template-columns: repeat(2, 1fr); }
+    .summary-grid, .timing-grid { grid-template-columns: 1fr; }
+    .page-title-prefix, .page-title-input, .page-title-suffix { font-size: 28px; }
+  }
+  @media(max-width: 600px) {
+    .info-grid { grid-template-columns: 1fr; }
+    .capsule-row { gap: 6px; }
+    .page-title-prefix, .page-title-input, .page-title-suffix { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="particles-canvas"></canvas>
+
+<div class="template-warning">⚠️ 本文件是模板原件，禁止直接编辑！正确操作：复制本文件 → 在 workflow/reference/ 文件夹中粘贴 → 在新文件中填入数据</div>
+
+<nav class="top-nav">
+  <div class="nav-title">🎼 参考曲深度分析</div>
+  <div class="nav-song"><input class="ph-input" style="width:220px;display:inline-block;background:transparent;border-color:rgba(255,204,102,0.2);color:var(--accent-gold);" id="navSongName" value="是妈妈是女儿 — 黄绮珊 × 希瑶"></div>
+  <div class="nav-meta" id="songMeta">分析日期：2026-05-17</div>
+</nav>
+
+<div class="main-container">
+
+  <!-- ==================== 表头（图片样式） ==================== -->
+  <div class="page-header">
+    <div class="page-title-wrap">
+      <span class="page-title-prefix">《</span>
+      <input class="page-title-input" id="pageTitleInput" value="是妈妈是女儿">
+      <span class="page-title-suffix">》词格分析报告</span>
+    </div>
+    <div class="page-subtitle-row">
+      <input class="page-subtitle-input" style="width:100px;" id="subArtistA" value="黄绮珊">
+      <span class="page-subtitle-sep">X</span>
+      <input class="page-subtitle-input" style="width:100px;" id="subArtistB" value="希瑶">
+      <input class="page-subtitle-input" style="width:80px;" id="subYear" value="2023">
+      <input class="page-subtitle-input" style="width:100px;" id="subLyricist" value="唐恬">
+      <span class="page-subtitle-sep">作词 /</span>
+      <input class="page-subtitle-input" style="width:100px;" id="subComposer" value="钱雷">
+      <span class="page-subtitle-sep">作曲</span>
+    </div>
+    <div class="capsule-row">
+      <div class="capsule"><input id="capKey" value="F大调"></div>
+      <div class="capsule"><input id="capTempo" value="Andante ~68 BPM"></div>
+      <div class="capsule"><input id="capTime" value="4/4"></div>
+      <div class="capsule"><input id="capVocal" value="对唱 / 母女"></div>
+      <div class="capsule"><input id="capArranger" value="键盘+弦乐"></div>
+    </div>
+  </div>
+
+  <!-- 6个信息卡片 -->
+  <div class="info-grid">
+    <div class="info-card">
+      <div class="info-label">调式与曲速</div>
+      <input class="info-value" id="infoKey" value="F大调 / Andante ~68 BPM">
+      <input class="info-sub" id="infoTempoLabel" value="行板 / 68 BPM">
+      <textarea class="info-desc" id="infoKeyDesc">母女各自陈述，开篇节奏舒缓如对话，叙事感强，速度稳定在68BPM，适合安静聆听场景。</textarea>
+    </div>
+    <div class="info-card">
+      <div class="info-label">曲式结构</div>
+      <input class="info-value" id="infoForm" value="Through-composed">
+      <input class="info-sub" id="infoFormSub" value="对话式叙事曲">
+      <textarea class="info-desc" id="infoFormDesc">非传统重复结构，母女各2段主歌 → 对话交叉4段 → 各1段独白 → Bridge → 共唱终曲。共约58行歌词。</textarea>
+    </div>
+    <div class="info-card">
+      <div class="info-label">配器特点</div>
+      <input class="info-value" id="infoInstr" value="钢琴主导 + 弦乐">
+      <input class="info-sub" id="infoInstrSub" value="键盘+大提琴/小提琴">
+      <textarea class="info-desc" id="infoInstrDesc">钢琴是核心对话载体，弦乐在情绪高点加入做铺垫。编曲克制，留白多，不抢人声，适合纯vocal叙事。</textarea>
+    </div>
+    <div class="info-card">
+      <div class="info-label">歌词总行数</div>
+      <input class="info-value" id="infoLines" value="约58行">
+      <input class="info-sub" id="infoLinesSub" value="母女各半，穿插对话">
+      <textarea class="info-desc" id="infoLinesDesc">妈妈约29行，女儿约29行。母女各自solo段约5句/段，对话交叉段妈妈4句女儿4句交替。</textarea>
+    </div>
+    <div class="info-card">
+      <div class="info-label">主歌段落</div>
+      <input class="info-value" id="infoVerse" value="4段主歌">
+      <input class="info-sub" id="infoVerseSub" value="每人各2段×5句">
+      <textarea class="info-desc" id="infoVerseDesc">妈妈主歌：Verse M1（5句叙事）、Verse M2（5句递进）
+女儿主歌：Verse D1（5句开场）、Verse D2（5句深入）
+每段主歌均独立叙事，不做常规AABA重复。</textarea>
+    </div>
+    <div class="info-card">
+      <div class="info-label">对话交织段</div>
+      <input class="info-value" id="infoDialogue" value="4段交叉对话">
+      <input class="info-sub" id="infoDialogueSub" value="妈妈4句 / 女儿4句">
+      <textarea class="info-desc" id="infoDialogueDesc">妈妈唱完一段→女儿接一段→形成4轮对话。语言风格：口语化、自然、妈妈语气偏叮嘱，女儿语气偏叛逆/试探。</textarea>
+    </div>
+  </div>
+
+  <!-- ==================== 1. 歌词逐段解析（最前） ==================== -->
+  <div class="card" id="card-lyrics">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">📜</span>歌词逐段解析</div>
+      <span class="module-optional-badge" onclick="toggleModule('lyrics')">可选模块</span>
+      <button class="module-toggle-btn" onclick="toggleModule('lyrics')">收起 ▲</button>
+    </div>
+    <div class="module-content" id="content-lyrics">
+      <div class="module-skip-hint"><span class="skip-icon">🚫</span>此模块为<strong>可选</strong>。如果没有歌词版权或不需要逐段解析，点击右上角「可选模块」即可折叠收起。</div>
+      <div class="edit-bar"><div class="dot"></div>根据实际曲式结构添加/删除段落，每段独立编辑</div>
+      <div id="lyricsContainer"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:8px;">
+        <select class="section-type-select" id="newLyricType">
+          <option value="intro">INTRO</option>
+          <option value="verse" selected>VERSE</option>
+          <option value="pre">PRE-CHORUS</option>
+          <option value="chorus">CHORUS</option>
+          <option value="bridge">BRIDGE</option>
+          <option value="hook">HOOK</option>
+          <option value="interlude">INTERLUDE</option>
+          <option value="outro">OUTRO</option>
+        </select>
+        <button class="btn-add" onclick="addLyricSection()">+ 添加歌词段落</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 2. 韵脚系统分析 ==================== -->
+  <div class="card" id="card-rhyme">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">🎯</span>韵脚系统分析</div>
+      <span class="module-optional-badge" onclick="toggleModule('rhyme')">可选模块</span>
+      <button class="module-toggle-btn" onclick="toggleModule('rhyme')">收起 ▲</button>
+    </div>
+    <div class="module-content" id="content-rhyme">
+      <div class="module-skip-hint"><span class="skip-icon">🚫</span>此模块为<strong>可选</strong>。如果参考曲没有明显押韵规律或分析不出来，点击右上角「可选模块」即可折叠收起。</div>
+      <div class="edit-bar"><div class="dot"></div>每行对应一个段落，缺少的段落可删除，多出的段落可添加</div>
+      <table class="rhyme-table">
+        <thead><tr><th style="width:120px">段落</th><th>韵脚方案</th><th>韵脚示例</th><th style="width:80px">韵母</th><th>押韵位置</th><th style="width:50px"></th></tr></thead>
+        <tbody id="rhymeTableBody"></tbody>
+      </table>
+      <button class="btn-add" onclick="addRhymeRow()">+ 添加段落</button>
+    </div>
+  </div>
+
+  <!-- ==================== 3. 意象手法分类解析 ==================== -->
+  <div class="card" id="card-imagery">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">✨</span>意象手法分类解析</div>
+      <span class="module-optional-badge" onclick="toggleModule('imagery')">可选模块</span>
+      <button class="module-toggle-btn" onclick="toggleModule('imagery')">收起 ▲</button>
+    </div>
+    <div class="module-content" id="content-imagery">
+      <div class="module-skip-hint"><span class="skip-icon">🚫</span>此模块为<strong>可选</strong>。如果参考曲意象不明显或不需要分类解析，点击右上角「可选模块」即可折叠收起。</div>
+      <div class="edit-bar"><div class="dot"></div>每个分类下可添加多条意象条目，每条包含标题、解析、仿写示例</div>
+      <div id="imageryCategories"></div>
+      <button class="btn-add" onclick="addImageryCategory()" style="margin-top:14px;">+ 添加意象分类</button>
+    </div>
+  </div>
+
+  <!-- ==================== 4. 情绪张力控制点 ==================== -->
+  <div class="card" id="card-emotion">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">🎭</span>情绪张力控制点解析</div>
+      <span class="module-optional-badge" onclick="toggleModule('emotion')">可选模块</span>
+      <button class="module-toggle-btn" onclick="toggleModule('emotion')">收起 ▲</button>
+    </div>
+    <div class="module-content" id="content-emotion">
+      <div class="module-skip-hint"><span class="skip-icon">🚫</span>此模块为<strong>可选</strong>。如果情绪张力分析不出来或不需要逐句拆解，点击右上角「可选模块」即可折叠收起。</div>
+      <div class="edit-bar"><div class="dot"></div>每句情绪张力包含：位置、情绪类型标签、歌词句、分析方法</div>
+      <div id="emotionCards"></div>
+      <button class="btn-add" onclick="addEmotionCard()" style="margin-top:14px;">+ 添加情绪张力点</button>
+    </div>
+  </div>
+
+  <!-- ==================== 5. 仿写核心规律 ==================== -->
+  <div class="card" id="card-rules">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">🔮</span>仿写核心规律</div>
+      <span class="module-optional-badge" onclick="toggleModule('rules')">可选模块</span>
+      <button class="module-toggle-btn" onclick="toggleModule('rules')">收起 ▲</button>
+    </div>
+    <div class="module-content" id="content-rules">
+      <div class="module-skip-hint"><span class="skip-icon">🚫</span>此模块为<strong>可选</strong>。如果总结不出规律或不需要，点击右上角「可选模块」即可折叠收起。</div>
+      <div class="edit-bar"><div class="dot"></div>从参考曲中提取的核心写作规律，每条包含描述+仿写结论</div>
+      <div id="ruleCards"></div>
+      <button class="btn-add" onclick="addRuleCard()" style="margin-top:14px;">+ 添加规律</button>
+    </div>
+  </div>
+
+  <!-- ==================== 6. 情绪张力释放时机 ==================== -->
+  <div class="card" id="card-timing">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">⏱️</span>情绪张力释放时机</div>
+      <span class="module-optional-badge" onclick="toggleModule('timing')">可选模块</span>
+      <button class="module-toggle-btn" onclick="toggleModule('timing')">收起 ▲</button>
+    </div>
+    <div class="module-content" id="content-timing">
+      <div class="module-skip-hint"><span class="skip-icon">🚫</span>此模块为<strong>可选</strong>。如果不需要分析情绪释放时机，点击右上角「可选模块」即可折叠收起。</div>
+      <div class="edit-bar"><div class="dot"></div>每个段落类型的情绪释放策略，可编辑内容</div>
+      <div class="timing-grid" id="timingGrid"></div>
+      <button class="btn-add" onclick="addTimingCard()">+ 添加段落策略</button>
+    </div>
+  </div>
+
+  <!-- ==================== 7. 关键写作手法 ==================== -->
+  <div class="card" id="card-patterns">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">🔑</span>关键写作手法</div>
+      <span class="module-optional-badge" onclick="toggleModule('patterns')">可选模块</span>
+      <button class="module-toggle-btn" onclick="toggleModule('patterns')">收起 ▲</button>
+    </div>
+    <div class="module-content" id="content-patterns">
+      <div class="module-skip-hint"><span class="skip-icon">🚫</span>此模块为<strong>可选</strong>。如果提取不出写作手法或不需要，点击右上角「可选模块」即可折叠收起。</div>
+      <div class="edit-bar"><div class="dot"></div>提取参考曲中的核心写作技巧，自由增删</div>
+      <div class="pattern-list" id="patternList"></div>
+      <button class="btn-add" onclick="addPatternItem()" style="margin-top:14px;">+ 添加写作手法</button>
+    </div>
+  </div>
+
+  <!-- ==================== 8. 仿写要点总结 ==================== -->
+  <div class="card" id="card-summary">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">📋</span>仿写要点总结</div>
+      <span class="module-optional-badge" onclick="toggleModule('summary')">可选模块</span>
+      <button class="module-toggle-btn" onclick="toggleModule('summary')">收起 ▲</button>
+    </div>
+    <div class="module-content" id="content-summary">
+      <div class="module-skip-hint"><span class="skip-icon">🚫</span>此模块为<strong>可选</strong>。如果不需要总结仿写要点，点击右上角「可选模块」即可折叠收起。</div>
+      <div class="summary-grid">
+        <div class="summary-card">
+          <div class="summary-title">🎵 结构要求</div>
+          <textarea class="ph-textarea" style="min-height:140px;" placeholder="根据上方曲式结构分析，填写结构要求（不需要可留空）：
+· 整体段落顺序
+· 各段句数要求
+· 情绪走向设计"></textarea>
+        </div>
+        <div class="summary-card">
+          <div class="summary-title">🎯 韵脚要求</div>
+          <textarea class="ph-textarea" style="min-height:140px;" placeholder="根据韵脚系统分析，填写韵脚要求（不需要可留空）：
+· 各段落韵脚方案
+· 换韵位置
+· 特殊押韵技巧"></textarea>
+        </div>
+        <div class="summary-card">
+          <div class="summary-title">✨ 意象要求</div>
+          <textarea class="ph-textarea" style="min-height:140px;" placeholder="根据意象手法分类分析，填写意象要求（不需要可留空）：
+· 核心意象词
+· 意象类别偏好
+· 意象引入方式
+· 具体>抽象原则"></textarea>
+        </div>
+        <div class="summary-card">
+          <div class="summary-title">💡 情绪设计</div>
+          <textarea class="ph-textarea" style="min-height:140px;" placeholder="根据情绪张力分析，填写情绪设计要求（不需要可留空）：
+· 情绪递进方式
+· 爆发点设计
+· 张力控制策略
+· 首尾呼应方式"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 9. 实例Prompt（新增） ==================== -->
+  <div class="card" id="card-prompt">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">📎</span>实例Prompt</div>
+    </div>
+    <div class="edit-bar" style="margin-bottom:16px;"><div class="dot"></div>将上述分析整理为可直接使用的仿写Prompt，点击复制按钮即可复制到剪贴板</div>
+    <textarea class="prompt-area" id="promptArea">参考曲：《是妈妈是女儿》
+作词：唐恬  作曲：钱雷
+
+===== 核心数据 =====
+调式：F大调 | 曲速：Andante ~68 BPM | 拍号：4/4
+曲式：Through-composed 对话式叙事曲
+配器：钢琴主导 + 弦乐四重奏
+歌词：58行，母女各半穿插对话
+主歌：4段（每人各2段×5句）
+对话交织：4段交叉（妈妈4句/女儿4句）
+韵脚规律：偶数句押韵为主，抱韵(ABCB)居多，终曲一韵到底
+
+===== 韵脚方案 =====
+· 妈妈主歌Verse：ABCB抱韵，韵母收口偏细腻（ai/u）
+· 女儿主歌Verse：ABCB抱韵，韵母偏开口（a/ai）
+· 对话交叉段：每段内部各自押韵，母女各自成体系
+· 终曲共唱：一韵到底，韵母开阔（a/ang）
+· Bridge：换韵点，情绪爆发处换韵制造张力
+
+===== 核心意象 =====
+【身体/生理】食言、头发白（用身体变化承载时间焦虑）
+【日常物品】行李、高铁广告里的猫、烧饼（具象钩子）
+【空间场景】窗外的窗（两个窗对视，代际凝视）、北风（担心具象化）
+【自然哲学】花（妈妈的生活美学）、水中月（真实与倒置）
+
+===== 情绪张力控制点 =====
+· 开篇自问式："够不够"三字母亲自我质疑，不给答案让听众进入
+· 中段收敛型：妈妈说"知道女儿不会照顾自己"，理解后退让，不爆发
+· 女儿的顿悟点："慢慢"——自我妥协也是接纳，从对抗到接受
+· Bridge爆发点："捣衣"古典意象收尾，用文言承载现代母女情
+
+===== 仿写核心规律 =====
+1. 具象替代抽象：不说"想"，说"看到一只猫像你"
+2. 身体变化承载时间焦虑：不说"老了"，说"头发白了"
+3. 口语+韵脚平衡：口语表达（好不好、会不会）+ 偶数句押韵
+4. 代际视角差：妈妈=担心/等待/回归；女儿=出发/探索/不确定
+5. 对话式叙事：两人交替，不是一个人从头到尾
+
+===== 情绪释放策略 =====
+· Verse（各自solo）：叙事平稳，留白多，不急于爆发
+· 对话交叉段：情绪开始递进，一方说完另一方接
+· Bridge：全曲情绪最高点，张力最强处
+· 终曲共唱：从爆发回落至平静，两人同唱和解收尾
+
+===== 仿写指令 =====
+请根据以上参考曲数据，仿写一首[填入主题]的歌词。
+
+要求：
+1. 韵脚方案参考上述设计，保持偶数句押韵
+2. 核心意象需包含：具象钩子（用物代替情感）+ 身体/生理细节
+3. 结构参考：通过-composed对话式，两人视角交替
+4. 情绪走向：开篇自问→中段递进→Bridge爆发→终曲和解
+5. 运用关键手法：对话式叙事、具象替代抽象、口语+韵脚平衡
+
+请输出完整歌词，每段注明角色标签（如【妈妈】【女儿】）。</textarea>"></textarea>
+    <button class="btn-copy" id="copyBtn" onclick="copyPrompt()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+      复制 Prompt
+    </button>
+  </div>
+
+</div>
+
+<script>
+// ==================== 模块折叠/展开 ====================
+function toggleModule(id) {
+  const content = document.getElementById('content-' + id);
+  const badge = document.querySelector('#card-' + id + ' .module-optional-badge');
+  const btn = document.querySelector('#card-' + id + ' .module-toggle-btn');
+  if (content.classList.contains('collapsed')) {
+    content.classList.remove('collapsed');
+    badge.textContent = '可选模块';
+    badge.classList.remove('closed');
+    btn.textContent = '收起 ▲';
+  } else {
+    content.classList.add('collapsed');
+    badge.textContent = '已关闭';
+    badge.classList.add('closed');
+    btn.textContent = '展开 ▼';
+  }
+}
+
+// ==================== 复制Prompt ====================
+function copyPrompt() {
+  const area = document.getElementById('promptArea');
+  area.select();
+  area.setSelectionRange(0, 999999);
+  navigator.clipboard.writeText(area.value).then(() => {
+    const btn = document.getElementById('copyBtn');
+    const originalHTML = btn.innerHTML;
+    btn.classList.add('copied');
+    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> 已复制！';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = originalHTML;
+    }, 2000);
+  }).catch(() => {
+    document.execCommand('copy');
+    const btn = document.getElementById('copyBtn');
+    btn.classList.add('copied');
+    btn.textContent = '✓ 已复制';
+    setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '📋 复制 Prompt'; }, 2000);
+  });
+}
+
+// ==================== 常量定义 ====================
+const STRUCT_TYPES = {
+  intro: { label: 'INTRO', cls: 'intro' },
+  verse: { label: 'VERSE', cls: 'verse' },
+  pre: { label: 'PRE-CHORUS', cls: 'pre' },
+  chorus: { label: 'CHORUS', cls: 'chorus' },
+  bridge: { label: 'BRIDGE', cls: 'bridge' },
+  hook: { label: 'HOOK', cls: 'hook' },
+  interlude: { label: 'INTERLUDE', cls: 'interlude' },
+  outro: { label: 'OUTRO', cls: 'outro' }
+};
+const EMOTION_TYPES = {
+  shrink: '收敛型', epiphany: '顿悟型', trust: '信任释放型', burst: '爆发型',
+  golden: '金句型', deep: '深层矛盾型', identity: '身份认同型',
+  progressive: '递进爆发型', subtle: '含蓄型', return: '回归型', reconcile: '和解型'
+};
+
+// ==================== 歌词段落 ====================
+let lyricSections = [
+  { type: 'verse', name: '', meta: '', lyrics: '' },
+  { type: 'pre', name: '', meta: '', lyrics: '' },
+  { type: 'chorus', name: '', meta: '', lyrics: '' },
+  { type: 'bridge', name: '', meta: '', lyrics: '' }
+];
+function getSectionTagClass(type) { return STRUCT_TYPES[type] ? STRUCT_TYPES[type].cls : 'verse'; }
+function getSectionLabel(type) { return STRUCT_TYPES[type] ? STRUCT_TYPES[type].label : type.toUpperCase(); }
+function renderLyricSections() {
+  const container = document.getElementById('lyricsContainer');
+  container.innerHTML = lyricSections.map((sec, i) => {
+    const cls = getSectionTagClass(sec.type);
+    const label = getSectionLabel(sec.type);
+    return `<div class="lyric-section">
+      <button class="btn-remove section-remove" onclick="removeLyricSection(${i})">×</button>
+      <div class="section-header">
+        <select class="section-type-select" onchange="updateLyricType(${i},this.value)">${Object.entries(STRUCT_TYPES).map(([k,v])=>`<option value="${k}" ${k===sec.type?'selected':''}>${v.label}</option>`).join('')}</select>
+        <input class="ph-input section-name-input" placeholder="填入段落功能，如：叙事铺陈" value="${sec.name}" onchange="updateLyricField(${i},'name',this.value)">
+        <input class="ph-input section-meta-input" placeholder="韵脚：【韵母】 · 【句数】句" value="${sec.meta}" onchange="updateLyricField(${i},'meta',this.value)">
+      </div>
+      <textarea class="ph-textarea" style="min-height:160px;" placeholder="填入 ${label} 的完整歌词，每行一句&#10;&#10;不需要此段落可直接删除上方删除按钮" onchange="updateLyricField(${i},'lyrics',this.value)">${sec.lyrics}</textarea>
+    </div>`;
+  }).join('');
+}
+function addLyricSection() { lyricSections.push({ type: document.getElementById('newLyricType').value, name: '', meta: '', lyrics: '' }); renderLyricSections(); }
+function removeLyricSection(i) { lyricSections.splice(i, 1); if(lyricSections.length===0) lyricSections.push({type:'verse',name:'',meta:'',lyrics:''}); renderLyricSections(); }
+function updateLyricType(i, v) { lyricSections[i].type = v; renderLyricSections(); }
+function updateLyricField(i, f, v) { lyricSections[i][f] = v; }
+
+// ==================== 韵脚表格 ====================
+let rhymeData = [
+  { type: 'verse', scheme: 'ABCB / 抱韵', example: '塞 / 爱 / 乖 / 来', rhyme: 'ai', position: '偶数句押，母女各段内部一致' },
+  { type: 'verse', scheme: 'ABCB / 抱韵', example: '路 / 度 / 赌 / 度', rhyme: 'u', position: '妈妈Verse2偶数句韵' },
+  { type: 'chorus', scheme: 'AAAA / 一韵到底', example: '放下 / 回答 / 放下 / 老家', rhyme: 'a', position: '终曲共唱段一韵到底' },
+  { type: 'bridge', scheme: 'ABAB / 交叉韵', example: '花 / 刮 / 她 / 家', rhyme: 'a/ua', position: 'Bridge情绪释放点换韵' }
+];
+function renderRhymeTable() {
+  const tbody = document.getElementById('rhymeTableBody');
+  tbody.innerHTML = rhymeData.map((row, i) => {
+    return `<tr>
+      <td><select class="section-type-select" onchange="updateRhymeType(${i},this.value)">${Object.entries(STRUCT_TYPES).map(([k,v])=>`<option value="${k}" ${k===row.type?'selected':''}>${v.label}</option>`).join('')}</select></td>
+      <td><input class="ph-input" style="font-size:13px;" placeholder="填入韵脚方案，如 AABB" value="${row.scheme}" onchange="updateRhymeField(${i},'scheme',this.value)"></td>
+      <td><input class="ph-input" style="font-size:13px;" placeholder="填入韵脚示例词" value="${row.example}" onchange="updateRhymeField(${i},'example',this.value)"></td>
+      <td><input class="ph-input" style="font-size:13px;text-align:center;" placeholder="韵母" value="${row.rhyme}" onchange="updateRhymeField(${i},'rhyme',this.value)"></td>
+      <td><input class="ph-input" style="font-size:13px;" placeholder="填入押韵位置说明" value="${row.position}" onchange="updateRhymeField(${i},'position',this.value)"></td>
+      <td><button class="btn-remove" onclick="removeRhymeRow(${i})">×</button></td>
+    </tr>`;
+  }).join('');
+}
+function addRhymeRow() { rhymeData.push({ type: 'verse', scheme: '', example: '', rhyme: '', position: '' }); renderRhymeTable(); }
+function removeRhymeRow(i) { rhymeData.splice(i, 1); if(rhymeData.length===0) rhymeData.push({type:'verse',scheme:'',example:'',rhyme:'',position:''}); renderRhymeTable(); }
+function updateRhymeType(i, v) { rhymeData[i].type = v; renderRhymeTable(); }
+function updateRhymeField(i, f, v) { rhymeData[i][f] = v; }
+
+// ==================== 意象手法分类 ====================
+let imageryCategories = [
+  { title: '身体/生理意象（最直接）', items: [
+    { title: '「食言」身体化', desc: '妈妈说女儿"食言"，不是概念批评，是生活化的食言（吃饭没吃干净），用身体感受说代际冲突。', example: '仿写：可用于写父亲对孩子的失望，用具体身体动作/习惯承载抽象情感。' },
+    { title: '「头发的白」生理衰退', desc: '妈妈视角：自己头发白了、时间在身体上留下痕迹，承载"变老"的焦虑和无奈。', example: '仿写：写父母对时间的感知，用身体变化写"时光流逝"而非直接说"老了"。' }
+  ]},
+  { title: '日常物品/动作意象（最常用）', items: [
+    { title: '「行李」', desc: '女儿的离开用"行李"承载，妈妈视角是等女儿回来，行李成为归家期待的符号。', example: '仿写：可用于写等待，写归途，写"家"作为物理/心理双重空间。' },
+    { title: '「烧饼」', desc: '女儿吃烧饼的口碑记忆，妈妈留着烧饼等着女儿回来——非常具体的食物意象。', example: '仿写：用某个食物承载地域记忆/家庭记忆，不说"想家"，说"留着你的烧饼"。' },
+    { title: '「高铁」', desc: '现代交通工具体现距离感，速度感对应关系的疏密。', example: '仿写：写距离/离别，用交通工具体现物理距离和心理距离的反差。' }
+  ]},
+  { title: '空间/场景意象（最深情）', items: [
+    { title: '「窗外的窗」', desc: '女儿住高楼的窗户→妈妈坐在家里，两个窗的对视，空间嵌套体现代际凝视。', example: '仿写：写代际关系的空间感，用"窗"、"门"、"台阶"等建筑空间做视线交汇点。' },
+    { title: '「刮北风」', desc: '妈妈对女儿的担心，北风作为季节意象，联系到健康/感冒等具体担忧。', example: '仿写：写担心，写惦记，用天气/季节承载关怀，不说"担心你"，说"别着了凉"。' }
+  ]},
+  { title: '自然/哲学意象（最高级）', items: [
+    { title: '「花」', desc: '妈妈说"摘的花"，花是妈妈一代人的生活美学，联系到"插花"的生活细节。', example: '仿写：写上一代人的美学观，用自然物承载生活态度。' },
+    { title: '「水中月」', desc: '倒影的月亮，物理真实和视觉倒置形成"真实vs假象"的哲学张力。', example: '仿写：写对真实和表象的思考，写追寻和失去，用自然现象做哲学隐喻。' }
+  ]}
+];
+function renderImageryCategories() {
+  const container = document.getElementById('imageryCategories');
+  container.innerHTML = imageryCategories.map((cat, ci) => `
+    <div class="imagery-category">
+      <button class="btn-remove cat-remove" onclick="removeImageryCategory(${ci})">×</button>
+      <div class="imagery-cat-header">
+        <input class="imagery-cat-title" placeholder="填入意象分类名称" value="${cat.title}" onchange="updateImageryCatTitle(${ci},this.value)">
+      </div>
+      ${cat.items.map((item, ii) => `
+        <div class="imagery-item">
+          <button class="btn-remove item-remove" onclick="removeImageryItem(${ci},${ii})">×</button>
+          <input class="ph-input imagery-item-title" style="margin-bottom:8px;font-weight:700;" placeholder="填入意象标题，如：&quot;吹白我的头发&quot;" value="${item.title}" onchange="updateImageryItem(${ci},${ii},'title',this.value)">
+          <textarea class="ph-textarea" style="min-height:60px;font-size:13px;line-height:1.7;margin-bottom:8px;" placeholder="填入意象解析（不需要可留空）" onchange="updateImageryItem(${ci},${ii},'desc',this.value)">${item.desc}</textarea>
+          <textarea class="imagery-example-input" placeholder="填入仿写借鉴示例（不需要可留空）" onchange="updateImageryItem(${ci},${ii},'example',this.value)">${item.example}</textarea>
+        </div>
+      `).join('')}
+      <button class="btn-add" onclick="addImageryItem(${ci})" style="margin-top:8px;font-size:11px;padding:8px 14px;">+ 添加意象条目</button>
+    </div>
+  `).join('');
+}
+function addImageryCategory() { imageryCategories.push({ title: '', items: [{ title: '', desc: '', example: '' }] }); renderImageryCategories(); }
+function removeImageryCategory(ci) { imageryCategories.splice(ci, 1); if(imageryCategories.length===0) imageryCategories.push({title:'',items:[{title:'',desc:'',example:''}]}); renderImageryCategories(); }
+function updateImageryCatTitle(ci, v) { imageryCategories[ci].title = v; }
+function addImageryItem(ci) { imageryCategories[ci].items.push({ title: '', desc: '', example: '' }); renderImageryCategories(); }
+function removeImageryItem(ci, ii) { imageryCategories[ci].items.splice(ii, 1); if(imageryCategories[ci].items.length===0) imageryCategories[ci].items.push({title:'',desc:'',example:''}); renderImageryCategories(); }
+function updateImageryItem(ci, ii, f, v) { imageryCategories[ci].items[ii][f] = v; }
+
+// ==================== 情绪张力控制点 ====================
+let emotionCards = [
+  { position: 'Verse M1 第1句', type: 'subtle', sentence: '我的孩子啊 我不知道自己做得够不够', method: '自问式开场，"够不够"三字包含母亲对自我角色的质疑。不是给出答案，是抛出困惑，为整首歌定调。' },
+  { position: 'Verse M1 第5句', type: 'trust', sentence: '早上高铁广告 有一只猫 像我女儿', method: '具象化思念：用一只猫的细节代替"我想你"。妈妈不说想，说看到一个广告里的猫像你。具象细节比直接陈述更有重量。' },
+  { position: 'Dialogue 交叉1', type: 'shrink', sentence: '但也知道 你不会好好吃饭', method: '妈妈的收敛：知道女儿不会照顾自己，是收敛型情绪——不是爆发，是理解后的退让。' },
+  { position: 'Verse D2 第3句', type: 'burst', sentence: '我只能好好地 慢慢学', method: '女儿的顿悟爆发点："慢慢"两字是自我妥协也是自我接纳。不再对抗，开始接受自己的不完美。' },
+  { position: 'Bridge', type: 'progressive', sentence: '如果你还想出发 妈妈将为你捣衣', method: 'Bridge是情绪释放区。"捣衣"是古诗词意象，妈妈用文言说"为你洗衣服"，古典表达现代母女关系，张力最强。' }
+];
+function renderEmotionCards() {
+  const container = document.getElementById('emotionCards');
+  container.innerHTML = emotionCards.map((card, i) => `
+    <div class="emotion-card">
+      <button class="btn-remove card-remove" onclick="removeEmotionCard(${i})">×</button>
+      <div class="emotion-header">
+        <input class="emotion-position-input" placeholder="填入位置，如：Verse1 第5句" value="${card.position}" onchange="updateEmotionCard(${i},'position',this.value)">
+        <select class="emotion-type-select" onchange="updateEmotionCard(${i},'type',this.value)">
+          ${Object.entries(EMOTION_TYPES).map(([k,v])=>`<option value="${k}" ${k===card.type?'selected':''}>${v}</option>`).join('')}
+        </select>
+        <span class="emotion-tag type-${card.type}">${EMOTION_TYPES[card.type]||'收敛型'}</span>
+      </div>
+      <textarea class="emotion-sentence-input" placeholder="填入歌词原句（不需要可留空）" onchange="updateEmotionCard(${i},'sentence',this.value)">${card.sentence}</textarea>
+      <textarea class="emotion-method-input" placeholder="填入张力分析方法（不需要可留空）" onchange="updateEmotionCard(${i},'method',this.value)">${card.method}</textarea>
+    </div>
+  `).join('');
+}
+function addEmotionCard() { emotionCards.push({ position: '', type: 'shrink', sentence: '', method: '' }); renderEmotionCards(); }
+function removeEmotionCard(i) { emotionCards.splice(i, 1); if(emotionCards.length===0) emotionCards.push({position:'',type:'shrink',sentence:'',method:''}); renderEmotionCards(); }
+function updateEmotionCard(i, f, v) { emotionCards[i][f] = v; if(f==='type') renderEmotionCards(); }
+
+// ==================== 仿写核心规律 ====================
+let ruleCards = [
+  { num: '规律 1', title: '具象替代抽象——不说"想"说"看到一只猫像你"', desc: '这首歌里妈妈从不直接说"我想你"，而是用"高铁广告里的猫像我女儿"来表达。这种具象替代比直接说"想"更有重量。', example: '仿写时：不要写"我很担心你"，写"我看到天气变冷了，不知道你有没有加衣服"。' },
+  { num: '规律 2', title: '用身体变化承载时间焦虑', desc: '妈妈说"头发白了"、"时间都去哪了"，不是直接说"我老了"，而是用身体的具体变化来承载时间焦虑。', example: '仿写时：写时间不用"时光飞逝"，写"你爸的背更驼了"、"镜子里的白头发又多了几根"。' },
+  { num: '规律 3', title: '口语化语言 + 韵脚约束 = 自然感', desc: '这首歌大量口语："够不够"、"好不好"、"会不会"、"食言"——但每句偶数字都押韵。在口语的自然感和韵脚的规整之间找到平衡。', example: '仿写时：先写口语，再检查偶数句尾字是否押韵。用口语的自然感冲淡"写词"的刻意感。' },
+  { num: '规律 4', title: '代际视角差——妈妈用担心，女儿用叛逆/探索', desc: '妈妈视角总是担心、叮嘱、等着；女儿视角是出发、探索、不确定。两条线在同一首歌里交织，形成对话张力。', example: '仿写时：写两个人的不同视角，一方是回归/等待，另一方是出发/寻找，对话交织而非独白。' }
+];
+function renderRuleCards() {
+  const container = document.getElementById('ruleCards');
+  container.innerHTML = ruleCards.map((rule, i) => `
+    <div class="rule-card">
+      <button class="btn-remove rule-remove" onclick="removeRuleCard(${i})">×</button>
+      <input class="rule-num" style="background:transparent;border:none;border-bottom:1px solid var(--border-color);font-family:inherit;outline:none;color:var(--accent-gold);margin-bottom:6px;width:120px;padding:2px 0;" placeholder="规律编号" value="${rule.num}" onchange="updateRuleCard(${i},'num',this.value)">
+      <input class="ph-input" style="margin-bottom:8px;font-weight:700;font-size:15px;" placeholder="填入规律标题（不需要可留空）" value="${rule.title}" onchange="updateRuleCard(${i},'title',this.value)">
+      <textarea class="ph-textarea" style="min-height:60px;font-size:13px;line-height:1.7;margin-bottom:8px;" placeholder="填入规律描述（不需要可留空）" onchange="updateRuleCard(${i},'desc',this.value)">${rule.desc}</textarea>
+      <textarea class="rule-example-input" placeholder="填入仿写结论（不需要可留空）" onchange="updateRuleCard(${i},'example',this.value)">${rule.example}</textarea>
+    </div>
+  `).join('');
+}
+function addRuleCard() { ruleCards.push({ num: '规律 ' + (ruleCards.length+1), title: '', desc: '', example: '' }); renderRuleCards(); }
+function removeRuleCard(i) { ruleCards.splice(i, 1); if(ruleCards.length===0) ruleCards.push({num:'规律 1',title:'',desc:'',example:''}); renderRuleCards(); }
+function updateRuleCard(i, f, v) { ruleCards[i][f] = v; }
+
+// ==================== 情绪张力释放时机 ====================
+let timingCards = [
+  { color: 'blue', title: 'Verse 叙事段（各自solo）', desc: '叙事为主，情绪平稳，不需要过多张力爆发。妈妈Verse说生活细节，女儿Verse说自我认知。节奏舒缓，留白多。' },
+  { color: 'pink', title: '对话交叉段（交替演唱）', desc: '对话是这首歌的核心张力点。母女交替，一方说完另一方接，形成4轮对话。情绪在此处开始递进。' },
+  { color: 'gold', title: 'Bridge 情绪爆发段', desc: 'Bridge是全曲情绪最高点。用"捣衣"这样的古典意象收尾，妈妈的情感在此处完全释放。这一段需要最强张力。' },
+  { color: 'teal', title: '终曲共唱段', desc: '母女和解的标志。两人同唱同一句，情绪从爆发回落至平静接受。终曲应该温暖、有出口感。' }
+];
+function renderTimingCards() {
+  const container = document.getElementById('timingGrid');
+  container.innerHTML = timingCards.map((t, i) => `
+    <div class="timing-card">
+      <button class="btn-remove timing-remove" style="float:right;margin-top:-4px;" onclick="removeTimingCard(${i})">×</button>
+      <input class="timing-input timing-title ${t.color}" placeholder="段落名称" value="${t.title}" onchange="updateTimingCard(${i},'title',this.value)">
+      <textarea class="timing-textarea" placeholder="填入该段落类型的情绪释放策略（不需要可留空）" onchange="updateTimingCard(${i},'desc',this.value)">${t.desc}</textarea>
+    </div>
+  `).join('');
+}
+function addTimingCard() { timingCards.push({ color: 'purple', title: '', desc: '' }); renderTimingCards(); }
+function removeTimingCard(i) { timingCards.splice(i, 1); if(timingCards.length===0) timingCards.push({color:'purple',title:'',desc:''}); renderTimingCards(); }
+function updateTimingCard(i, f, v) { timingCards[i][f] = v; }
+
+// ==================== 写作手法 ====================
+let patternData = [
+  { icon: '🔄', name: '对话式叙事（非独白）', desc: '母女交替，一人说一段，不是一个人从头说到尾。对话比独白更有现场感，也更容易引发听众共鸣。' },
+  { icon: '🎣', name: '具象钩子（猫/行李/烧饼）', desc: '用具体的物（高铁广告里的猫、等着女儿的烧饼）代替抽象情感（想念、担心）。具体物比抽象词更有画面感。' },
+  { icon: '⚡', name: '自问式开场（不急于给答案）', desc: '开场是问句"够不够"，不是陈述。问句让听众进入思考，陈述让听众被动接受。' },
+  { icon: '🎭', name: '口语韵脚平衡', desc: '大量口语化表达（好不好、会不会），但偶数句严格押韵。口语的自然感+韵脚的规整感=歌词的自然流畅。' },
+  { icon: '🔁', name: '结尾回环（与开头呼应）', desc: '结尾的"妈妈将为你捣衣"和开头的自问"够不够"形成回环。不是简单的词汇重复，是情绪语气的回归。' }
+];
+function renderPatterns() {
+  const list = document.getElementById('patternList');
+  list.innerHTML = patternData.map((p, i) => `<div class="pattern-item">
+    <button class="btn-remove item-remove" onclick="removePatternItem(${i})">×</button>
+    <input class="pattern-icon-input" value="${p.icon}" onchange="updatePatternField(${i},'icon',this.value)">
+    <div class="pattern-content">
+      <input class="ph-input" style="margin-bottom:6px;font-weight:700;" placeholder="填入手法名称（不需要可留空）" value="${p.name}" onchange="updatePatternField(${i},'name',this.value)">
+      <input class="ph-input" style="font-size:12px;color:var(--text-secondary);" placeholder="填入具体描述（不需要可留空）" value="${p.desc}" onchange="updatePatternField(${i},'desc',this.value)">
+    </div>
+  </div>`).join('');
+}
+function addPatternItem() { patternData.push({ icon: '💡', name: '', desc: '' }); renderPatterns(); }
+function removePatternItem(i) { patternData.splice(i, 1); if(patternData.length===0) patternData.push({icon:'💡',name:'',desc:''}); renderPatterns(); }
+function updatePatternField(i, f, v) { patternData[i][f] = v; }
+
+// ==================== 初始化 ====================
+renderLyricSections();
+renderRhymeTable();
+renderImageryCategories();
+renderEmotionCards();
+renderRuleCards();
+renderTimingCards();
+renderPatterns();
+
+// 粒子背景
+(function initParticles() {
+  const canvas = document.getElementById('particles-canvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+  for (let i = 0; i < 40; i++) {
+    particles.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: (Math.random()-0.5)*0.4, vy: (Math.random()-0.5)*0.4, r: Math.random()*1.5+0.5 });
+  }
+  function draw() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p => {
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(68,136,255,0.2)'; ctx.fill();
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0||p.x>canvas.width) p.vx*=-1;
+      if(p.y<0||p.y>canvas.height) p.vy*=-1;
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// 日期
+document.getElementById('songMeta').textContent = '分析日期：' + new Date().toLocaleDateString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit' }).replace(/\//g,'-');
+</script>
+</body>
+</html>
