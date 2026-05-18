@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>龙舟上的时间 · 三版赛马</title>
+<title>三版赛马展示</title>
 <style>
   :root {
     --bg0:#0a0b10; --bg1:#13151f; --bg2:#1c1f2d; --bg3:#25293a; --bg4:#2f3450;
@@ -31,6 +31,14 @@
   .btn:hover{background:var(--bg3);color:var(--text)}
   .btn.on{background:var(--gold2);color:var(--gold);border-color:rgba(255,196,71,0.3)}
   .btn.copied{background:rgba(0,217,163,0.2)!important;color:var(--g)!important;border-color:var(--g3)!important}
+
+  /* ===== 试听按钮 ===== */
+  .btn-demo{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;border:1px solid var(--b3);background:var(--b2);color:var(--b);transition:.2s;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+  .btn-demo:hover{background:var(--b3);color:#fff;box-shadow:0 0 16px var(--b3)}
+  .btn-demo::before{content:'🎧'}
+  .comp-head .btn-demo{font-size:11px;padding:4px 10px;margin-left:auto}
+  .btn-demo.disabled{opacity:0.4;cursor:not-allowed;border-color:var(--border);background:var(--bg3);color:var(--text3)}
+  .btn-demo.disabled:hover{background:var(--bg3);color:var(--text3);box-shadow:none}
 
   /* ===== 主区域 ===== */
   .main{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:64px 16px 40px}
@@ -147,7 +155,7 @@
   <span class="ver-tab a on" onclick="toggleVerTab('a')" id="tab-a">版本 A</span>
   <span class="ver-tab b on" onclick="toggleVerTab('b')" id="tab-b">版本 B</span>
   <span class="ver-tab c on" onclick="toggleVerTab('c')" id="tab-c">版本 C</span>
-  <div class="topbar-center" id="pageTitle">2026-05-18 · 龙舟上的时间 · 三版赛马</div>
+  <div class="topbar-center" id="pageTitle">2025-01-15 · 三版赛马展示</div>
   <div class="tools">
     <button class="btn on" id="view-scroll" onclick="setView('scroll')">📜 滚动</button>
     <button class="btn" id="view-compare" onclick="setView('compare')">⚖️ 对比</button>
@@ -201,10 +209,11 @@
 <script>
 const TYPE_LABELS={intro:'Intro',verse:'Verse',pre:'Pre-Chorus',chorus:'Chorus',bridge:'Bridge',hook:'Hook',interlude:'Interlude',outro:'Outro'};
 
+// 示例数据
 let data={
-  a:{name:'龙舟上的时间',model:'Lysa 手写版',prompt:'以父与子的龙舟传承为核心，口语化叙述感强，长句为主，画面说话。',secs:[
+  a:{name:'龙舟上的时间',model:'Lysa 手写版',prompt:'以父与子的龙舟传承为核心，口语化叙述感强，长句为主，画面说话。',demoUrl:'https://minimax-algeng-chat-tts.oss-cn-wulanchabu.aliyuncs.com/audio%2Feffect%2F065a7a5f6e20fd8f410ddd5ceb4a1716_1779124180794_3068.mp3?Expires=1779210580&OSSAccessKeyId=LTAI5tGLnRTkBjLuYPjNcKQ8&Signature=I%2Fd6xPpZPJsWT9ukqQISaR8wdgY%3D',secs:[
     {type:'intro',style:'江边清晨',lyrics:'（江边清晨，雾还没散，有人在整理缆绳的声音）'},
-    {type:'verse',style:'第一人称叙述',lyrics:'我爸他从船上下来的时候我看见他膝盖上全是泥\n他蹲下来把我抱上去的时候我那时候大概才五岁\n他的手碰到我脖子的时候我觉得有点扎是粗糙的\n但他笑起来的时候眼睛会眯成一条缝那个样子我记得很清楚\n他把桨递给我让我先感受一下那个重量说等过了端午节你就要学会自己划了\n那天的太阳很烈水面全是金光我眯着眼睛看他\n他站在船头的样子像一座塑像一样我那时候觉得他什么都扛得住'},
+    {type:'verse',style:'第一人称叙述',lyrics:'我爸他从船上下下来的时候我看见他膝盖上全是泥\n他蹲下来把我抱上去的时候我那时候大概才五岁\n他的手碰到我脖子的时候我觉得有点扎是粗糙的\n但他笑起来的时候眼睛会眯成一条缝那个样子我记得很清楚\n他把桨递给我让我先感受一下那个重量说等过了端午节你就要学会自己划了\n那天的太阳很烈水面全是金光我眯着眼睛看他\n他站在船头的样子像一座塑像一样我那时候觉得他什么都扛得住'},
     {type:'pre',style:'内心独白',lyrics:'后来很多年我都在想那一天他到底在想什么\n他有没有想过这个小孩以后也会站他那个位置\n我那时候什么都不懂只知道他的手很暖而江风很凉\n他说话的声音被风吹散了一半我听不太清楚但我记住了'},
     {type:'chorus',style:'情感爆发',lyrics:'端午节的早上鼓声会从水面上传过来一直震动到胸口\n我爸他会站在船头用桨尖指着前方那个方向大声喊一二三\n我跟着他的节奏划水浪花溅起来的时候会打湿我的袖子我从来没有躲过\n这么多年过去了我开始理解为什么他每年都要回来那条江\n那些浪花其实从未改变过就像他当年教我的时候一样\n但他的背已经驼了而我变成了那个站在船头的人\n每次龙舟转弯的时候我都会想起他当年的动作我跟着他划\n我终于活成了他的样子这句话我不想说但我心里知道就是这样'},
     {type:'verse',style:'Melody Rap',lyrics:'去年端午他坐船尾的时候一直在咳嗽我说你别划了\n他说再划几趟吧就不划了然后他就笑了一下\n我把桨握紧发现木头上有一块地方特别亮那是他握了二十年才磨出来的\n每年端午他都要用舌头舔一下绳结说这样绑比较结实我试过一次很咸\n今年他没有来我在船上闻到他以前喝过的茶的味道\n他教我的那些东西都在我手上老茧下面\n原来他一直在用这种方式留给我一些什么我每次划桨的时候都能感觉到他在'},
@@ -213,7 +222,7 @@ let data={
     {type:'hook',style:'情感收尾',lyrics:'（延续Chorus的情绪，逐句收紧，在最后一句稍作停顿后轻轻收束）'},
     {type:'outro',style:'留白',lyrics:'船靠岸的时候天已经亮了\n我爸他在岸边站着等我\n他什么也没说我什么也没说\n我们就这样走回去'}
   ]},
-  b:{name:'龙舟上的时间',model:'Qwen 72B',prompt:'偏诗化，部分说理感，三代视角（父→我→子），用词相对工整对仗。',secs:[
+  b:{name:'龙舟上的时间',model:'Qwen 72B',prompt:'偏诗化，部分说理感，三代视角（父→我→子），用词相对工整对仗。',demoUrl:'https://minimax-algeng-chat-tts.oss-cn-wulanchabu.aliyuncs.com/audio%2Feffect%2F065a7ad764e689234e712b1ab1c2dde9_1779124266173_3023.mp3?Expires=1779210666&OSSAccessKeyId=LTAI5tGLnRTkBjLuYPjNcKQ8&Signature=9%2B8QAK9bCW%2Bc1oTbcTJWj5Dp4%2Fk%3D',secs:[
     {type:'intro',style:'回忆',lyrics:'偷偷翻出来那条旧龙舟，上头还留着爸爸的汗味'},
     {type:'verse',style:'童年视角',lyrics:'记得小时候，爸爸带我去河边\n那龙舟就像个大玩具，我们俩心跳得快\n他教我划桨，手把手\n手上的茧，磨得我生疼\n汗珠子顺着脊梁流\n但我没喊累，想让他刮目相看\n河面的风，吹得皮肤都发紧\n爸爸的笑容，比胜利的号角还响亮'},
     {type:'pre',style:'时间感慨',lyrics:'那时候的我，以为能划一辈子\n爸爸总在前面，带我去冒险\n一条河，两颗心\n时间在桨声里悄悄流逝'},
@@ -224,7 +233,7 @@ let data={
     {type:'hook',style:'情感收束',lyrics:'（延续三代传承的主题，在最后一句轻轻收束）'},
     {type:'outro',style:'留白',lyrics:'龙舟上的故事，一代接着一代\n时间在桨声里，轻轻唱着歌'}
   ]},
-  c:{name:'龙舟上的时间',model:'Gemini 2.5-pro',prompt:'画面感强，句式偏工整，文学性强，部分句子刻意工对，意象更丰富。',secs:[
+  c:{name:'龙舟上的时间',model:'Gemini 2.5-pro',prompt:'画面感强，句式偏工整，文学性强，部分句子刻意工对，意象更丰富。',demoUrl:'https://minimax-algeng-chat-tts.oss-cn-wulanchabu.aliyuncs.com/audio%2Feffect%2F065a7b2df1fa0c2234e3299facf525b7_1779124352539_406.mp3?Expires=1779210752&OSSAccessKeyId=LTAI5tGLnRTkBjLuYPjNcKQ8&Signature=BIps6DHjXe7ze%2B%2BHVa1mku2oK1Q%3D',secs:[
     {type:'intro',style:'环境开场',lyrics:'（江水流淌声，远处传来模糊的鼓点，渐强）'},
     {type:'verse',style:'白描',lyrics:'老桨搁在岸边，桨叶沾着潮气\n你弯腰系着布鞋，背影有点长\n手臂上的汗珠，顺着皱纹淌下来\n老龙舟静静浮着，船身红漆掉了一块\n你摸了摸船舷，手指粗糙像树皮\n没说什么，只是点了根烟\n烟圈飘到江面，慢慢散开\n我站在你身后，学着你的样子深呼吸'},
     {type:'pre',style:'低沉',lyrics:'清晨的风吹过，有点凉\n旧的船歌，你哼得低沉\n那些调子，我好像听过好几趟\n却从来没开口，跟着唱'},
@@ -272,6 +281,7 @@ function renderScroll(){
           <textarea class="prompt-input" placeholder="填入生成 Prompt..." id="prompt-${v}" onchange="data.${v}.prompt=this.value">${data[v].prompt}</textarea>
           <button class="btn-sm" id="cpp-${v}" onclick="copyPrompt('${v}',this)">📋 复制Prompt</button>
           <button class="btn-sm" id="cpl-${v}" onclick="copyAllLyrics('${v}',this)">📋 复制歌词</button>
+          ${data[v].demoUrl?`<a class="btn-demo" href="${data[v].demoUrl}" target="_blank" rel="noopener">🎧 试听 Demo</a>`:`<span class="btn-demo disabled">🎧 试听（暂无）</span>`}
         </div>
       </div>
       <div class="ver-body">${secHtml}</div>
@@ -359,7 +369,7 @@ function renderCompare(){
   grid.className='compare-grid cols-'+Math.max(n,1);
   grid.innerHTML=['a','b','c'].filter(v=>visibleVers[v]).map(v=>{
     return `<div class="comp-col ${v}">
-      <div class="comp-head ${v}">${data[v].name||'版本 '+v.toUpperCase()}</div>
+      <div class="comp-head ${v}">${data[v].name||'版本 '+v.toUpperCase()}${data[v].demoUrl?` <a class="btn-demo" href="${data[v].demoUrl}" target="_blank" rel="noopener">🎧 试听</a>`:` <span class="btn-demo disabled">🎧 试听</span>`}</div>
       <div class="comp-body">${data[v].secs.map((sec,idx)=>{
         const tn=data[v].secs.filter((s,i)=>i<idx&&s.type===sec.type).length+1;
         const label=TYPE_LABELS[sec.type]+(tn>1?' '+tn:'');
