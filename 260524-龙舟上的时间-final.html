@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>龙舟上的时间 · 最终交付定稿 · AISHARKS</title>
+<style>
+/* ═══════════════════════════════════════════
+   CSS RESET & BASE
+   ═══════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg0:#06060b;--bg1:#0c0c14;--bg2:#141420;--bg3:#1c1c2e;--text:#e8e8f0;
+  --text2:#7a7a9a;--text3:#4a4a6a;--border:rgba(255,255,255,0.06);
+  --r:#ff6b6b;--g:#4ecdc4;--gold:#ffd93d;--b:#6bb5ff;--purple:#a78bfa;
+  --gold2:rgba(255,217,61,0.15);--gold3:rgba(255,217,61,0.3);
+  --g2:rgba(78,205,196,0.15);--g3:rgba(78,205,196,0.3);
+  --b2:rgba(107,181,255,0.15);--b3:rgba(107,181,255,0.3);
+}
+body{
+  background:var(--bg0);color:var(--text);font-family:"Noto Sans SC","PingFang SC",-apple-system,BlinkMacSystemFont,sans-serif;
+  min-height:100vh;overflow-x:hidden;line-height:1.7;
+}
+.data-font{font-family:'SF Mono','JetBrains Mono','Fira Code',monospace}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.06);border-radius:3px}
+::selection{background:rgba(107,181,255,0.3);color:var(--text)}
+
+/* ═══════════════════════════════════════════
+   LAYOUT
+   ═══════════════════════════════════════════ */
+#particle-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
+main{position:relative;z-index:1;max-width:1300px;margin:0 auto;padding:80px 28px 64px}
+
+/* ═══════════════════════════════════════════
+   LIQUID GLASS
+   ═══════════════════════════════════════════ */
+.card{
+  background:rgba(12,12,20,0.7);backdrop-filter:blur(20px) saturate(150%);
+  -webkit-backdrop-filter:blur(20px) saturate(150%);
+  border:1px solid rgba(255,255,255,0.08);
+  box-shadow:inset 0 1px 1px rgba(255,255,255,0.05),0 8px 32px rgba(0,0,0,0.2);
+  border-radius:20px;transition:border-color 0.3s ease,transform 0.3s ease,box-shadow 0.3s ease;
+}
+.card:hover{border-color:rgba(255,255,255,0.12);transform:translateY(-2px);box-shadow:inset 0 1px 1px rgba(255,255,255,0.08),0 12px 40px rgba(0,0,0,0.3)}
+
+/* ═══════════════════════════════════════════
+   NAVBAR
+   ═══════════════════════════════════════════ */
+.navbar{
+  position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;gap:16px;
+  padding:0 28px;height:56px;background:rgba(6,6,11,0.6);
+  backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.nav-brand{font-size:15px;font-weight:900;color:var(--text)}
+.nav-song{font-size:12px;font-weight:600;color:var(--gold)}
+.nav-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
+.btn{
+  font-size:11px;font-weight:700;padding:6px 14px;border-radius:999px;cursor:pointer;
+  transition:all 0.2s ease;font-family:inherit;border:1px solid transparent;
+}
+.btn-outline{background:var(--bg3);color:var(--text2);border-color:var(--border)}
+.btn-outline:hover{color:var(--text);border-color:var(--border-hover)}
+.btn-gold{background:var(--gold2);color:var(--gold);border-color:var(--gold3)}
+.btn-badge{background:var(--bg3);color:var(--text3);border-color:var(--border);cursor:default}
+
+/* ═══════════════════════════════════════════
+   CONFIG PANEL
+   ═══════════════════════════════════════════ */
+.config-panel{
+  background:rgba(12,12,20,0.85);backdrop-filter:blur(24px) saturate(160%);
+  border:2px solid var(--gold);border-radius:20px;padding:24px;margin-bottom:24px;
+}
+.config-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.config-title{font-size:18px;font-weight:900;color:var(--gold);display:flex;align-items:center;gap:8px}
+.config-sub{font-size:11px;color:var(--text3)}
+.section-label{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);margin:16px 0 8px}
+
+/* ═══════════════════════════════════════════
+   FORM ELEMENTS
+   ═══════════════════════════════════════════ */
+.in{
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);
+  border-radius:10px;padding:8px 14px;font-size:13px;color:var(--text);outline:none;
+  transition:all 0.2s ease;font-family:inherit;width:100%;
+}
+.in:focus{border-color:var(--b);background:rgba(255,255,255,0.05)}
+.in::placeholder{color:var(--text3);font-style:italic}
+textarea.in{resize:vertical;min-height:60px;line-height:1.8}
+select.in{cursor:pointer;min-width:100px;width:auto;padding:6px 10px;font-size:12px;font-weight:700}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.flex-col{display:flex;flex-direction:column;gap:8px}
+.meta-row{display:grid;grid:1fr / 1fr 1.5fr 1fr;gap:8px}
+.lyric-row{display:grid;grid:100px 120px 1fr / 100px 120px 1fr;gap:8px;align-items:start}
+@media(max-width:768px){.grid-3,.grid-2,.meta-row{grid-template-columns:1fr}.lyric-row{grid-template-columns:80px 100px 1fr}}
+
+/* ═══════════════════════════════════════════
+   CONTENT DISPLAY
+   ═══════════════════════════════════════════ */
+.page-header{text-align:center;margin-bottom:40px}
+.page-title{font-size:38px;font-weight:900;background:linear-gradient(135deg,#ffd93d,#4ecdc4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.page-subtitle{font-size:13px;color:var(--text3);font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-top:8px}
+.divider{height:1px;width:200px;margin:16px auto;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)}
+
+/* Warning */
+.warning{
+  padding:14px;margin-bottom:20px;border-radius:20px;text-align:center;
+  font-size:12px;font-weight:700;color:var(--r);border:1px dashed rgba(255,107,107,0.4);
+  background:linear-gradient(135deg,rgba(255,107,107,0.12),rgba(255,107,53,0.08));
+}
+
+/* Song title block */
+.title-block{text-align:center;padding:32px;position:relative;overflow:hidden}
+.title-glow{position:absolute;top:0;left:50%;transform:translateX(-50%);width:300px;height:3px;border-radius:999px;background:linear-gradient(90deg,transparent,var(--gold),transparent);box-shadow:0 0 30px rgba(255,217,61,0.3)}
+.song-title{font-size:42px;font-weight:900;color:var(--gold);letter-spacing:1px;margin-bottom:8px}
+.song-artist{font-size:15px;color:var(--text2);margin-bottom:16px}
+.tags{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:12px}
+.tag{display:inline-block;padding:6px 16px;border-radius:999px;font-size:12px;font-weight:700}
+.stats{display:flex;justify-content:center;gap:24px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.stat-num{font-size:22px;font-weight:900;font-family:'SF Mono','JetBrains Mono',monospace;color:var(--text)}
+.stat-label{font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:1px}
+
+/* Section header */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:8px}
+.section-title{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:900;color:var(--text)}
+.badge{font-size:11px;padding:4px 12px;border-radius:999px;font-weight:700}
+
+/* Prompt cards */
+.prompt-card{
+  padding:24px;border-radius:18px;margin-bottom:16px;
+  background:linear-gradient(135deg,rgba(255,217,61,0.08),rgba(78,205,196,0.05));
+  border:1px solid rgba(255,217,61,0.2);
+}
+.prompt-label{font-size:14px;font-weight:900;color:var(--gold);margin-bottom:12px}
+.prompt-text{
+  font-family:'SF Mono','JetBrains Mono',monospace;font-size:13px;line-height:1.9;
+  color:var(--text);background:rgba(0,0,0,0.3);padding:16px;border-radius:12px;
+  border:1px solid rgba(255,255,255,0.05);word-break:break-all;white-space:pre-wrap;
+}
+.cover-card{
+  padding:24px;border-radius:18px;margin-bottom:16px;
+  background:linear-gradient(135deg,rgba(167,139,250,0.08),rgba(107,181,255,0.05));
+  border:1px solid rgba(167,139,250,0.2);
+}
+.cover-label{font-size:14px;font-weight:900;color:var(--purple);margin-bottom:12px}
+
+/* Lyrics */
+.lyrics-box{padding:24px;border-radius:18px;background:var(--bg2);border:1px solid rgba(255,255,255,0.05)}
+.sect-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.sect-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:999px;font-size:11px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase}
+.lyric-lines{font-size:15px;line-height:2;padding-left:4px}
+.lyric-line{padding:3px 8px;border-radius:6px}
+.lyric-meta{color:var(--text3)} /* 括号注释如（前奏...） */
+
+/* Metadata table */
+.meta-table{width:100%;border-collapse:collapse}
+.meta-table th{text-align:left;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg2)}
+.meta-table td{padding:12px 14px;font-size:13px;border-bottom:1px solid rgba(255,255,255,0.03)}
+.meta-table tr:hover{background:rgba(255,255,255,0.02)}
+.meta-field{color:var(--text)}
+.meta-value{color:var(--gold);font-weight:700}
+.meta-desc{color:var(--text3);font-size:12px}
+
+/* Copy texts */
+.copy-card{
+  padding:24px;border-radius:18px;margin-bottom:16px;
+  background:linear-gradient(135deg,rgba(255,217,61,0.08),rgba(78,205,196,0.05));
+  border:1px solid rgba(255,217,61,0.2);
+}
+.copy-label{font-size:14px;font-weight:900;color:var(--gold);margin-bottom:12px}
+.copy-text{
+  font-family:'SF Mono','JetBrains Mono',monospace;font-size:13px;line-height:1.9;
+  color:var(--text);background:rgba(0,0,0,0.3);padding:16px;border-radius:12px;
+  border:1px solid rgba(255,255,255,0.05);white-space:pre-wrap;word-break:break-all;
+}
+
+/* Footer */
+.footer{text-align:center;font-size:11px;color:var(--text3);padding:24px 0 16px;border-top:1px solid var(--border);margin-top:16px}
+
+/* Toast */
+.toast{position:fixed;top:80px;right:20px;z-index:9999;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:700;color:var(--g);border:1px solid var(--g);background:var(--bg1);animation:fadeInUp 0.3s ease}
+
+/* Entrance animation */
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.reveal{opacity:0;transform:translateY(20px);transition:opacity 0.6s ease,transform 0.6s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* Margin utilities */
+.mb-6{margin-bottom:24px}.p-6{padding:24px}.p-4{padding:16px}
+.flex{display:flex}.justify-between{justify-content:space-between}.items-center{align-items:center}.gap-2{gap:8px}.gap-3{gap:12px}.flex-wrap{wrap:wrap}
+.mr-auto{margin-right:auto}.mt-4{margin-top:16px}.mb-4{margin-bottom:16px}.mb-3{margin-bottom:12px}
+.overflow-x{overflow-x:auto}
+.text-center{text-align:center}
+.w-full{width:100%}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<!-- ═══════════════════════════════════════════
+     EMBEDDED DATA - 本地文件回退用
+     莎姐的脚本也可以直接替换这部分内容
+     ═══════════════════════════════════════════ -->
+<script type="application/json" id="app-data">
+{
+  "_comment": "AISHARKS 最终交付模板 - 修改引号内的内容即可，不要改字段名",
+
+  "songTitle": "龙舟上的时间",
+  "songArtist": "AISHARKS · AIsharks Music",
+  "tags": ["民族融合", "World Music", "情怀叙事", "传统与现代"],
+
+  "lyrics": [
+    {
+      "type": "intro",
+      "label": "INTRO",
+      "lines": ["（器乐前奏：笛子+弦乐 8小节）"]
+    },
+    {
+      "type": "verse",
+      "label": "VERSE 1",
+      "lines": [
+        "那条船停在岸边，你摸着船上的红漆",
+        "手指像粗糙的树皮",
+        "老桨还沾着潮气，你弯腰系着布鞋",
+        "膝盖上裹满了泥",
+        "我站在身后，学着样子，慢慢深呼吸",
+        "你笑着抱我上船，把那张桨，递到我手里"
+      ]
+    },
+    {
+      "type": "verse",
+      "label": "VERSE 2",
+      "lines": [
+        "我好奇的，抚摸着感受着它的重量",
+        "和一块块老旧的斑",
+        "你说过了今天，你就要学会自己划了",
+        "它会带着你走",
+        "你轻轻哼着歌，像是告诉我别怕，要勇敢些",
+        "我听不清楚，但我永远记得"
+      ]
+    },
+    {
+      "type": "pre",
+      "label": "PRE-CHORUS",
+      "lines": [
+        "清晨的风吹过，有点凉",
+        "旧的船歌，你总哼得低沉",
+        "那些调子，我好像听过好多年",
+        "却从来没开口，跟着唱"
+      ]
+    },
+    {
+      "type": "chorus",
+      "label": "CHORUS",
+      "lines": [
+        "龙舟上的时间啊，一圈一圈晃",
+        "水花拍在脸上，咸咸的，有点烫",
+        "旧的桨，握在手里，越磨越亮",
+        "江风掠过耳畔过去的话不用讲",
+        "汗水湿了衣裳，又被太阳晒干",
+        "握桨的手掌换了一双又一双",
+        "笑着望那条江，往日的雾还没散",
+        "只有那首船歌静静飘荡水面上"
+      ]
+    },
+    {
+      "type": "verse",
+      "label": "VERSE 3",
+      "lines": [
+        "端午节的那天，鼓声会从水面传来",
+        "一直震动到胸口",
+        "爸爸会站在船头，用桨尖指着前方",
+        "坚定的大声喊，一二三",
+        "河边的老怀树，和模糊的风景",
+        "还是往日的样子，只有船上的人",
+        "换我站在船头，握着那张老桨"
+      ]
+    },
+    {
+      "type": "verse",
+      "label": "VERSE 4",
+      "lines": [
+        "我喊着一二三的节奏，划开浪花",
+        "就像当年教我的一样",
+        "手中同样的重量，那块老旧的斑",
+        "变得愈发光亮",
+        "时间在龙舟上，悄悄流淌",
+        "岁月里埋藏多少故事",
+        "好多事已经淡忘，但我永远记得"
+      ]
+    },
+    {
+      "type": "pre",
+      "label": "PRE-CHORUS（变奏）",
+      "lines": [
+        "清晨的风吹过，有点凉",
+        "旧的船歌，总是哼得低沉",
+        "那些调子，我已经唱过好几年",
+        "有个声音轻轻的，跟着唱"
+      ]
+    },
+    {
+      "type": "chorus",
+      "label": "CHORUS（Full Band）",
+      "lines": [
+        "龙舟上的时间啊，一圈一圈晃",
+        "水花拍在脸上，咸咸的，有点烫",
+        "旧的桨，握在手里，越磨越亮",
+        "江风掠过耳畔过去的话不用讲",
+        "汗水湿了衣裳，又被太阳晒干",
+        "握桨的手掌换了一双又一双",
+        "笑着望那条江，往日的雾还没散",
+        "只有那首船歌静静飘荡水面上",
+        "啊~ 啊~ 啊~ 啊~",
+        "龙舟上的时间啊，一圈一圈晃",
+        "水花拍在脸上，咸咸的，有点烫",
+        "旧的桨，握在手里，越磨越亮",
+        "江风掠过耳畔过去的话不用讲",
+        "汗水湿了衣裳，又被太阳晒干",
+        "握桨的手掌换了一双又一双",
+        "笑着望那条江，往日的雾还没散",
+        "只有那首船歌静静飘荡水面上"
+      ]
+    },
+    {
+      "type": "outro",
+      "label": "OUTRO",
+      "lines": ["（笛子渐弱，弦乐淡出，江水声）"]
+    }
+  ],
+
+  "prompt": {
+    "style": "Markante Dizi oder Synth-Flöte prägt das Stück mit Hauptmelodien, stark von chinesischer traditioneller Musik beeinflusst. Atmosphärische Synthesizer-Pads und Streicher erweitern den Raum. Elektronische Perkussion und Synthesizer-Bass legen das rhythmische Fundament. Gesamtstimmung: meditativ, spirituell, mit Weltmusik-Charakter.",
+    "metaTags": "genre: ethnic fusion, world music / mood: meditative, spiritual, traditional, atmospheric, cultural / theme: dragon boat, time, inheritance, family bond / vocal: Mandarin Chinese / speed: slow to medium / key: minor / instruments: Dizi, synthesizer, percussion, strings",
+    "negative": "avoid: pop-dance, electronic club, heavy bass drop, western rap, cheerful upbeat, major key dominance"
+  },
+
+  "meta": [
+    { "field": "歌曲标题", "value": "《龙舟上的时间》", "desc": "最终确定的歌曲名" },
+    { "field": "主题", "value": "龙舟传承·父子时光·乡土记忆", "desc": "核心表达主题" },
+    { "field": "情绪", "value": "meditative, nostalgic, spiritual", "desc": "整体歌曲情绪" },
+    { "field": "流派", "value": "民族融合 / World Music / Ethnic Fusion", "desc": "音乐流派分类" },
+    { "field": "BPM", "value": "74", "desc": "建议速度" },
+    { "field": "调式", "value": "小调为主，结尾转大调", "desc": "主调大小调" },
+    { "field": "时长", "value": "4:00 - 4:30", "desc": "预估时长" },
+    { "field": "目标平台", "value": "网易云音乐 / QQ音乐 / 抖音", "desc": "优先发布平台" },
+    { "field": "参考曲", "value": "《是妈妈是女儿》黄绮珊×希林娜依·高", "desc": "仿写参考曲目" }
+  ],
+
+  "cover": {
+    "main": "a cinematic cover image, calm river at dawn, a traditional wooden dragon boat sitting still on misty water, an elderly man and a young boy standing together at the bow holding a worn paddle, soft golden morning light cutting through atmospheric fog, warm nostalgic mood, Chinese rural riverside scene, cinematic aspect ratio 2:3, high detail, soft color palette of deep teals and warm amber --style raw --ar 2:3 --s 180 --q 2",
+    "alt": "minimalist album cover, abstract watercolor of a dragon boat silhouette on calm water, ink-wash style with warm amber and deep blue gradients, single golden light ray from above, melancholic yet hopeful atmosphere, no text, 2:3 aspect ratio --style raw --ar 2:3 --s 150 --q 2"
+  },
+
+  "copy": {
+    "shortDesc": "龙舟上的时间，一圈一圈晃。这首歌写给所有在河流边长大、又在城市里走远的人。爸爸教我划桨的那天，他没告诉我，这条江会流一辈子。",
+    "note": "写这首歌的时候，我想的是小时候站在江边，看爷爷和爸爸划船回来的样子。\n\n他们不会说什么大道理，就是把桨递给我，说：自己划。\n\n这首歌不煽情，不催泪。它只是说：有些东西，就是这样一代一代传下来的。",
+    "long": "【创作手记】\n\n这首歌来自一个很私人的画面——小时候站在河边，看爸爸或者爷爷把船划回来。\n\n他们不会说什么，就是把桨递给我，让我学着划。\n\n后来城市建起来了，河被填了，江被污染了，那条船也不知道去了哪里。但每次闻到端午节的艾草味，或者听到划船的号子声，那个画面就会回来。\n\n《龙舟上的时间》不是写给龙舟文化的。它是写给那种"我学会了，然后传下去"的传承感的。\n\n你接过那张旧桨的时候，上面已经磨得发亮了。\n\n这就是时间。\n\n制作：AIsharks Music\n作词：Lysa / 杰少"
+  }
+}
+
+</script>
+</head>
+<body>
+
+<!-- Three.js Particle Background -->
+<canvas id="particle-canvas"></canvas>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <span class="nav-brand">✨ 最终发布定稿</span>
+  <span class="nav-song" id="nav-song">龙舟上的时间</span>
+  <div class="nav-actions">
+    <button class="btn btn-gold" id="toggle-config">🔧 数据配置</button>
+    <span class="btn btn-badge">Step 7 · 最终交付</span>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<main id="main">
+  <p id="loading" style="text-align:center;padding:60px 0;color:var(--text3)">正在加载数据...</p>
+</main>
+
+<script>
+// ═══════════════════════════════════════════
+// THREE.JS PARTICLE NETWORK BACKGROUND
+// ═══════════════════════════════════════════
+(function(){
+  const canvas=document.getElementById('particle-canvas');
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:false,alpha:false});
+  renderer.setSize(window.innerWidth,window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.5));
+  renderer.setClearColor('#06060b');
+
+  const scene=new THREE.Scene();
+  scene.fog=new THREE.Fog('#06060b',400,900);
+  const camera=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,1,1000);
+  camera.position.z=300;
+
+  const COUNT=300,CONN=120;
+  const positions=new Float32Array(COUNT*3);
+  const velocities=[];
+  const w=window.innerWidth,h=window.innerHeight;
+
+  for(let i=0;i<COUNT;i++){
+    positions[i*3]=(Math.random()-0.5)*w*1.5;
+    positions[i*3+1]=(Math.random()-0.5)*h*1.5;
+    positions[i*3+2]=(Math.random()-0.5)*200;
+    velocities.push({vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3,vz:(Math.random()-0.5)*0.05});
+  }
+
+  // Points
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.BufferAttribute(positions,3));
+  const sizes=new Float32Array(COUNT);
+  for(let i=0;i<COUNT;i++)sizes[i]=1+Math.random()*1.5;
+  geo.setAttribute('size',new THREE.BufferAttribute(sizes,1));
+
+  scene.add(new THREE.Points(geo,new THREE.PointsMaterial({
+    color:'#6bb5ff',size:2,transparent:true,opacity:0.15,
+    blending:THREE.AdditiveBlending,depthWrite:false,sizeAttenuation:true
+  })));
+
+  // Connection lines
+  const lineGeo=new THREE.BufferGeometry();
+  const linePos=new Float32Array(COUNT*COUNT*6);
+  const lineCol=new Float32Array(COUNT*COUNT*6);
+  lineGeo.setAttribute('position',new THREE.BufferAttribute(linePos,3));
+  lineGeo.setAttribute('color',new THREE.BufferAttribute(lineCol,3));
+  const lineMat=new THREE.LineBasicMaterial({vertexColors:true,transparent:true,opacity:1,blending:THREE.AdditiveBlending,depthWrite:false});
+  const lines=new THREE.LineSegments(lineGeo,lineMat);
+  scene.add(lines);
+
+  const mouse={x:0,y:0};
+  window.addEventListener('mousemove',e=>{mouse.x=e.clientX-w/2;mouse.y=-(e.clientY-h/2)});
+
+  function animate(){
+    requestAnimationFrame(animate);
+    const pos=geo.attributes.position.array;
+    for(let i=0;i<COUNT;i++){
+      const ix=i*3,iy=ix+1,iz=ix+2;
+      const dx=mouse.x-pos[ix],dy=mouse.y-pos[iy];
+      const distM=Math.sqrt(dx*dx+dy*dy);
+      if(distM<150&&distM>1){const f=(1-distM/150)*0.3;velocities[i].vx+=(dx/distM)*f*0.01;velocities[i].vy+=(dy/distM)*f*0.01}
+      pos[ix]+=velocities[i].vx;pos[iy]+=velocities[i].vy;pos[iz]+=velocities[i].vz;
+      if(pos[ix]<-w*0.8||pos[ix]>w*0.8)velocities[i].vx*=-1;
+      if(pos[iy]<-h*0.8||pos[iy]>h*0.8)velocities[i].vy*=-1;
+      if(pos[iz]<-100||pos[iz]>100)velocities[i].vz*=-1;
+    }
+    geo.attributes.position.needsUpdate=true;
+
+    let li=0;
+    for(let i=0;i<COUNT;i++){
+      for(let j=i+1;j<COUNT;j++){
+        const dx=pos[i*3]-pos[j*3],dy=pos[i*3+1]-pos[j*3+1];
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<CONN){
+          const a=(1-d/CONN)*0.06;
+          const b=li*6;
+          [pos[i*3],pos[i*3+1],pos[i*3+2],pos[j*3],pos[j*3+1],pos[j*3+2]].forEach((v,i)=>linePos[b+i]=v);
+          for(let k=0;k<6;k++)lineCol[b+k]=0.42*a*(k%3===2?1.69:1); // 0.42,0.71,1.0 normalized
+          li++;
+        }
+      }
+    }
+    for(let i=li*6;i<linePos.length;i++)linePos[i]=0;
+    lineGeo.attributes.position.needsUpdate=true;
+    lineGeo.attributes.color.needsUpdate=true;
+    lineGeo.setDrawRange(0,li*2);
+    renderer.render(scene,camera);
+  }
+  animate();
+  window.addEventListener('resize',()=>{camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight)});
+})();
+
+// ═══════════════════════════════════════════
+// APP STATE & DATA
+// ═══════════════════════════════════════════
+let songData=null;
+let showConfig=true;
+
+// Section type colors for lyrics
+const sectionColors={
+  intro:{bg:'rgba(255,107,53,0.15)',text:'#ff6b35'},
+  verse:{bg:'rgba(107,181,255,0.15)',text:'#6bb5ff'},
+  pre:{bg:'rgba(167,139,250,0.15)',text:'#a78bfa'},
+  chorus:{bg:'rgba(255,217,61,0.15)',text:'#ffd93d'},
+  bridge:{bg:'rgba(78,205,196,0.15)',text:'#4ecdc4'},
+  outro:{bg:'rgba(255,107,53,0.15)',text:'#ff6b35'},
+  hook:{bg:'rgba(255,107,107,0.15)',text:'#ff6b6b'},
+  interlude:{bg:'rgba(154,205,50,0.15)',text:'#9acd32'},
+};
+const sectionLabels={intro:'INTRO',verse:'VERSE',pre:'PRE-CHORUS',chorus:'CHORUS',bridge:'BRIDGE',hook:'HOOK',interlude:'INTERLUDE',outro:'OUTRO'};
+const tagColors=[
+  {bg:'rgba(255,107,107,0.15)',text:'#ff6b6b',border:'rgba(255,107,107,0.3)'},
+  {bg:'rgba(107,181,255,0.15)',text:'#6bb5ff',border:'rgba(107,181,255,0.3)'},
+  {bg:'rgba(167,139,250,0.15)',text:'#a78bfa',border:'rgba(167,139,250,0.3)'},
+];
+
+// ═══════════════════════════════════════════
+// DATA LOADING
+// ═══════════════════════════════════════════
+async function loadData(){
+  // Strategy 1: Try fetch (works on http/https servers)
+  try{
+    const res=await fetch('./data.json');
+    if(res.ok){songData=await res.json();console.log('Loaded via fetch');finishLoad();return}
+  }catch(e){console.log('fetch failed (expected for file://):',e.message)}
+
+  // Strategy 2: Fallback to embedded JSON (works for local file://)
+  try{
+    const el=document.getElementById('app-data');
+    if(el){songData=JSON.parse(el.textContent);console.log('Loaded via embedded JSON');finishLoad();return}
+  }catch(e){console.error('Embedded JSON parse failed:',e)}
+
+  // Strategy 3: Show error with instructions
+  document.getElementById('loading').innerHTML=
+    '<span style="font-size:18px">❌ 数据加载失败</span><br><br>'+
+    '<span style="font-size:13px">可能原因：</span><br>'+
+    '<span style="font-size:12px">1. data.json 不存在于同目录</span><br>'+
+    '<span style="font-size:12px">2. 使用 file:// 协议时浏览器拦截了 fetch（已自动回退到内嵌数据，但仍失败）</span><br><br>'+
+    '<span style="font-size:12px">解决方案：用本地服务器打开，如 npx serve 或 python -m http.server</span>';
+}
+function finishLoad(){
+  document.getElementById('loading').style.display='none';
+  document.getElementById('nav-song').textContent=songData.songTitle||'未命名';
+  renderAll();
+}
+
+// ═══════════════════════════════════════════
+// RENDER FUNCTIONS
+// ═══════════════════════════════════════════
+function renderAll(){
+  const main=document.getElementById('main');
+  // Keep config panel if it exists
+  const existingConfig=document.getElementById('config-panel');
+  const configHTML=existingConfig?existingConfig.outerHTML:renderConfigPanel();
+
+  main.innerHTML=configHTML+`
+    ${renderWarning()}
+    ${renderPageHeader()}
+    ${renderTitleBlock()}
+    ${renderBulkCopy()}
+    ${renderLyrics()}
+    ${renderPrompts()}
+    ${renderMeta()}
+    ${renderCover()}
+    ${renderCopyTexts()}
+    ${renderFooter()}
+  `;
+  attachCopyListeners();
+  setupRevealAnimation();
+}
+
+function renderConfigPanel(){
+  if(!songData)return '';
+  const d=songData;
+  return `<div id="config-panel" class="config-panel reveal">
+    <div class="config-header">
+      <div><span class="config-title">🔧 数据配置区</span><span class="config-sub"> — 只改这里，下方页面自动更新</span></div>
+      <button class="btn btn-outline" onclick="toggleConfig()">✕ 完成配置</button>
+    </div>
+
+    <div class="section-label">📌 基本信息</div>
+    <div class="grid-3">
+      <div><div style="font-size:10px;color:var(--text3);margin-bottom:4px">歌名</div><input class="in" id="cfg-title" value="${esc(d.songTitle)}"></div>
+      <div><div style="font-size:10px;color:var(--text3);margin-bottom:4px">艺术家</div><input class="in" id="cfg-artist" value="${esc(d.songArtist)}"></div>
+      <div><div style="font-size:10px;color:var(--text3);margin-bottom:4px">标签（逗号分隔）</div><input class="in" id="cfg-tags" value="${esc(d.tags.join(','))}"></div>
+    </div>
+
+    <div class="section-label">🎛️ Suno Prompt</div>
+    <div class="flex-col">
+      <div><div style="font-size:10px;color:var(--text3);margin-bottom:4px">Style</div><textarea class="in" id="cfg-style">${esc(d.prompt.style)}</textarea></div>
+      <div><div style="font-size:10px;color:var(--text3);margin-bottom:4px">Metadata</div><textarea class="in" id="cfg-meta">${esc(d.prompt.metaTags)}</textarea></div>
+      <div><div style="font-size:10px;color:var(--text3);margin-bottom:4px">Negative</div><textarea class="in" id="cfg-neg">${esc(d.prompt.negative)}</textarea></div>
+    </div>
+
+    <div class="section-label">🖼️ 封面 Prompt</div>
+    <div class="grid-2">
+      <div><div style="font-size:10px;color:var(--text3);margin-bottom:4px">主封面</div><textarea class="in" id="cfg-cover-main">${esc(d.cover.main)}</textarea></div>
+      <div><div style="font-size:10px;color:var(--text3);margin-bottom:4px">备选</div><textarea class="in" id="cfg-cover-alt">${esc(d.cover.alt)}</textarea></div>
+    </div>
+
+    <div class="section-label">📣 发布文案</div>
+    <div class="flex-col">
+      <div><div style="font-size:10px;color:var(--text3);margin-bottom:4px">短简介</div><textarea class="in" id="cfg-short">${esc(d.copy.shortDesc)}</textarea></div>
+      <div><div style="font-size:10px;color:var(--text3);margin-bottom:4px">网易云笔记</div><textarea class="in" id="cfg-note">${esc(d.copy.note)}</textarea></div>
+      <div><div style="font-size:10px;color:var(--text3);margin-bottom:4px">长文案</div><textarea class="in" id="cfg-long">${esc(d.copy.long)}</textarea></div>
+    </div>
+
+    <div class="section-label">📊 元数据</div>
+    <div class="flex-col" id="cfg-meta-rows">
+      ${d.meta.map((m,i)=>`<div class="meta-row" data-idx="${i}">
+        <input class="in" value="${esc(m.field)}" placeholder="字段名">
+        <input class="in" value="${esc(m.value)}" placeholder="值" style="color:var(--gold);font-weight:700">
+        <input class="in" value="${esc(m.desc)}" placeholder="说明" style="color:var(--text3)">
+      </div>`).join('')}
+    </div>
+
+    <div class="section-label">📝 歌词段落</div>
+    <div class="flex-col" id="cfg-lyric-rows">
+      ${d.lyrics.map((l,i)=>`<div class="lyric-row" data-idx="${i}">
+        <select class="in" style="width:100px">
+          ${Object.entries(sectionLabels).map(([k,lab])=>`<option value="${k}"${k===l.type?' selected':''}>${lab}</option>`).join('')}
+        </select>
+        <input class="in" value="${esc(l.label)}" placeholder="标签">
+        <textarea class="in" placeholder="歌词，每行一句">${esc(l.lines.join('\n'))}</textarea>
+      </div>`).join('')}
+    </div>
+
+    <div style="margin-top:16px;text-align:center">
+      <button class="btn btn-gold" onclick="applyConfig()" style="font-size:14px;padding:10px 32px">💾 应用更改</button>
+    </div>
+  </div>`;
+}
+
+function renderWarning(){return`<div class="warning">⚠️ 本文件是模板原件，禁止直接编辑！正确操作：复制本文件 → 在 workflow/delivery/ 文件夹中粘贴 → 在新文件中填入数据</div>`}
+function renderPageHeader(){return`<div class="page-header"><h1 class="page-title">🎯 最终版交付</h1><p class="page-subtitle">歌词 · Prompt · 元标签</p><div class="divider"></div></div>`}
+
+function renderTitleBlock(){
+  const d=songData;
+  const totalChars=d.lyrics.reduce((s,l)=>s+l.lines.join('').length,0);
+  const totalLines=d.lyrics.reduce((s,l)=>s+l.lines.length,0);
+  return`<div class="card title-block reveal">
+    <div class="title-glow"></div>
+    <div class="song-title">《${esc(d.songTitle)}》</div>
+    <div class="song-artist">${esc(d.songArtist)}</div>
+    <div class="tags">${d.tags.map((t,i)=>{
+      const c=tagColors[i%3];
+      return`<span class="tag" style="background:${c.bg};color:${c.text};border:1px solid ${c.border}">${esc(t)}</span>`
+    }).join('')}</div>
+    <div class="stats">
+      <div><div class="stat-num">${totalLines}</div><div class="stat-label">总行数</div></div>
+      <div><div class="stat-num">${totalChars}</div><div class="stat-label">总字数</div></div>
+      <div><div class="stat-num">${d.lyrics.length}</div><div class="stat-label">段落数</div></div>
+    </div>
+  </div>`;
+}
+
+function renderBulkCopy(){
+  return`<div class="card p-4 reveal mb-6">
+    <div class="flex gap-2 flex-wrap">
+      <button class="btn btn-outline copy-btn" data-type="lyrics">📋 复制完整歌词</button>
+      <button class="btn btn-outline copy-btn" data-type="prompt">📋 复制 Prompt 组合</button>
+      <button class="btn btn-outline copy-btn" data-type="all">📋 复制全部交付内容</button>
+    </div>
+  </div>`;
+}
+
+function renderLyrics(){
+  return`<div class="card p-6 reveal mb-6">
+    <div class="section-header">
+      <div class="section-title"><span style="font-size:18px">📝</span> 最终歌词定稿</div>
+      <span class="badge" style="background:var(--g2);color:var(--g);border:1px solid var(--g3)">✓ 已确认</span>
+    </div>
+    <div class="lyrics-box">
+      ${songData.lyrics.map((sec,si)=>{
+        const c=sectionColors[sec.type]||sectionColors.verse;
+        return`<div style="margin-bottom:24px"${si===songData.lyrics.length-1?'':''}>
+          <div class="sect-header">
+            <span class="sect-tag" style="background:${c.bg};color:${c.text}">${esc(sec.label)}</span>
+          </div>
+          <div class="lyric-lines">
+            ${sec.lines.map(line=>`<div class="lyric-line${line.startsWith('（')?' lyric-meta':''}">${esc(line)}</div>`).join('')}
+          </div>
+        </div>`
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+function renderPrompts(){
+  return`<div class="card p-6 reveal mb-6">
+    <div class="section-header">
+      <div class="section-title"><span style="font-size:18px">🎛️</span> Suno 风格 Prompt</div>
+      <span class="badge" style="background:var(--b2);color:var(--b);border:1px solid var(--b3)">用于音乐生成</span>
+    </div>
+    ${[
+      {key:'style',label:'Style Prompt'},
+      {key:'metaTags',label:'Metadata Tags'},
+      {key:'negative',label:'Negative Tags'},
+    ].map(item=>`<div class="prompt-card">
+      <div class="flex justify-between items-center mb-3">
+        <span class="prompt-label">${item.label}</span>
+        <button class="btn btn-outline copy-btn" data-type="prompt-${item.key}">📋 复制</button>
+      </div>
+      <div class="prompt-text">${esc(songData.prompt[item.key])}</div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function renderMeta(){
+  return`<div class="card p-6 reveal mb-6">
+    <div class="section-header">
+      <div class="section-title"><span style="font-size:18px">📊</span> 完整元数据</div>
+    </div>
+    <div class="overflow-x">
+      <table class="meta-table">
+        <thead><tr><th>字段</th><th>内容</th><th>说明</th></tr></thead>
+        <tbody>
+          ${songData.meta.map(row=>`<tr>
+            <td class="meta-field">${esc(row.field)}</td>
+            <td class="meta-value">${esc(row.value)}</td>
+            <td class="meta-desc">${esc(row.desc)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function renderCover(){
+  return`<div class="card p-6 reveal mb-6">
+    <div class="section-header">
+      <div class="section-title"><span style="font-size:18px">🖼️</span> 封面图生成 Prompt</div>
+      <span class="badge" style="background:var(--purple2);color:var(--purple);border:1px solid rgba(167,139,250,0.3)">豆包</span>
+    </div>
+    ${[
+      {key:'main',label:'封面 Prompt'},
+      {key:'alt',label:'备选版本'},
+    ].map(item=>`<div class="cover-card">
+      <div class="flex justify-between items-center mb-3">
+        <span class="cover-label">${item.label}</span>
+        <button class="btn btn-outline copy-btn" data-type="cover-${item.key}">📋 复制</button>
+      </div>
+      <div class="prompt-text" style="font-size:12px;color:var(--text2)">${esc(songData.cover[item.key])}</div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function renderCopyTexts(){
+  return`<div class="card p-6 reveal mb-6">
+    <div class="section-header">
+      <div class="section-title"><span style="font-size:18px">📣</span> 发布文案</div>
+    </div>
+    ${[
+      {key:'shortDesc',label:'📀 短简介（微博/抖音）'},
+      {key:'note',label:'📝 网易云站内笔记'},
+      {key:'long',label:'📄 长文案（公众号/小红书）'},
+    ].map(item=>`<div class="copy-card">
+      <div class="flex justify-between items-center mb-3">
+        <span class="copy-label">${item.label}</span>
+        <button class="btn btn-outline copy-btn" data-type="copy-${item.key}">📋 复制</button>
+      </div>
+      <div class="copy-text">${esc(songData.copy[item.key])}</div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function renderFooter(){
+  const today=new Date().toLocaleDateString('zh-CN',{year:'numeric',month:'2-digit',day:'2-digit'}).replace(/\//g,'-');
+  return`<div class="footer">AISHARKS Music Intelligence · ${today} · Step 7 最终交付</div>`;
+}
+
+// ═══════════════════════════════════════════
+// ESCAPE HTML
+// ═══════════════════════════════════════════
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+// ═══════════════════════════════════════════
+// COPY SYSTEM
+// ═══════════════════════════════════════════
+let copiedId=null;
+function doCopy(text,id){
+  const realText=text||'【内容为空】';
+  navigator.clipboard.writeText(realText).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=realText;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+  });
+  // Show toast
+  const t=document.getElementById('toast');
+  t.textContent='✅ 已复制到剪贴板';t.className='toast';
+  setTimeout(()=>{t.textContent='';t.className=''},2500);
+  // Button feedback
+  document.querySelectorAll('.copy-btn').forEach(btn=>{
+    if(btn.dataset.type===id){btn.textContent='✓ 已复制';btn.classList.add('btn-gold');btn.classList.remove('btn-outline')}
+    else{btn.textContent='📋 复制';btn.classList.remove('btn-gold');btn.classList.add('btn-outline')}
+  });
+  if(copiedId)clearTimeout(copiedId);
+  copiedId=setTimeout(()=>{
+    document.querySelectorAll('.copy-btn').forEach(btn=>{btn.textContent='📋 复制';btn.classList.remove('btn-gold');btn.classList.add('btn-outline')});
+  },2000);
+}
+
+function attachCopyListeners(){
+  document.querySelectorAll('.copy-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const type=btn.dataset.type;
+      if(type==='lyrics')doCopy(songData.lyrics.map(s=>`[${s.label}]\n${s.lines.join('\n')}`).join('\n\n'),type);
+      else if(type==='prompt')doCopy(`【Style】\n${songData.prompt.style}\n\n【Meta】\n${songData.prompt.metaTags}\n\n【Negative】\n${songData.prompt.negative}`,type);
+      else if(type==='all')doCopy(`【${songData.songTitle}】\n\n${songData.lyrics.map(s=>`[${s.label}]\n${s.lines.join('\n')}`).join('\n\n')}\n\n【Style】\n${songData.prompt.style}\n\n【Meta】\n${songData.prompt.metaTags}\n\n【Negative】\n${songData.prompt.negative}\n\n【封面】\n${songData.cover.main}\n\n【短】\n${songData.copy.shortDesc}\n\n【笔记】\n${songData.copy.note}\n\n【长】\n${songData.copy.long}`,type);
+      else if(type==='prompt-style')doCopy(songData.prompt.style,type);
+      else if(type==='prompt-metaTags')doCopy(songData.prompt.metaTags,type);
+      else if(type==='prompt-negative')doCopy(songData.prompt.negative,type);
+      else if(type==='cover-main')doCopy(songData.cover.main,type);
+      else if(type==='cover-alt')doCopy(songData.cover.alt,type);
+      else if(type==='copy-shortDesc')doCopy(songData.copy.shortDesc,type);
+      else if(type==='copy-note')doCopy(songData.copy.note,type);
+      else if(type==='copy-long')doCopy(songData.copy.long,type);
+    });
+  });
+}
+
+// ═══════════════════════════════════════════
+// CONFIG PANEL TOGGLE & APPLY
+// ═══════════════════════════════════════════
+function toggleConfig(){
+  showConfig=!showConfig;
+  const panel=document.getElementById('config-panel');
+  if(panel)panel.style.display=showConfig?'block':'none';
+  document.getElementById('toggle-config').innerHTML=showConfig?'🔧 隐藏配置':'🔧 数据配置';
+}
+document.getElementById('toggle-config').addEventListener('click',toggleConfig);
+
+function applyConfig(){
+  songData.songTitle=document.getElementById('cfg-title').value;
+  songData.songArtist=document.getElementById('cfg-artist').value;
+  songData.tags=document.getElementById('cfg-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+  songData.prompt.style=document.getElementById('cfg-style').value;
+  songData.prompt.metaTags=document.getElementById('cfg-meta').value;
+  songData.prompt.negative=document.getElementById('cfg-neg').value;
+  songData.cover.main=document.getElementById('cfg-cover-main').value;
+  songData.cover.alt=document.getElementById('cfg-cover-alt').value;
+  songData.copy.shortDesc=document.getElementById('cfg-short').value;
+  songData.copy.note=document.getElementById('cfg-note').value;
+  songData.copy.long=document.getElementById('cfg-long').value;
+
+  // Meta rows
+  document.querySelectorAll('#cfg-meta-rows .meta-row').forEach((row,idx)=>{
+    const inputs=row.querySelectorAll('input');
+    if(songData.meta[idx]){songData.meta[idx].field=inputs[0].value;songData.meta[idx].value=inputs[1].value;songData.meta[idx].desc=inputs[2].value}
+  });
+
+  // Lyric rows
+  document.querySelectorAll('#cfg-lyric-rows .lyric-row').forEach((row,idx)=>{
+    const sel=row.querySelector('select');
+    const inputs=row.querySelectorAll('input,textarea');
+    if(songData.lyrics[idx]){
+      songData.lyrics[idx].type=sel.value;
+      songData.lyrics[idx].label=inputs[0].value;
+      songData.lyrics[idx].lines=inputs[1].value.split('\n');
+    }
+  });
+
+  document.getElementById('nav-song').textContent=songData.songTitle;
+  renderAll();
+  // Re-show config
+  showConfig=true;
+  document.getElementById('toggle-config').innerHTML='🔧 隐藏配置';
+}
+
+// ═══════════════════════════════════════════
+// SCROLL REVEAL ANIMATION
+// ═══════════════════════════════════════════
+function setupRevealAnimation(){
+  const observer=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')})
+  },{threshold:0.1});
+  document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+loadData();
+</script>
+</body>
+</html>

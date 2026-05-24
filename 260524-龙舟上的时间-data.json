@@ -1,0 +1,156 @@
+{
+  "_comment": "AISHARKS 最终交付模板 - 修改引号内的内容即可，不要改字段名",
+
+  "songTitle": "龙舟上的时间",
+  "songArtist": "AISHARKS · AIsharks Music",
+  "tags": ["民族融合", "World Music", "情怀叙事", "传统与现代"],
+
+  "lyrics": [
+    {
+      "type": "intro",
+      "label": "INTRO",
+      "lines": ["（器乐前奏：笛子+弦乐 8小节）"]
+    },
+    {
+      "type": "verse",
+      "label": "VERSE 1",
+      "lines": [
+        "那条船停在岸边，你摸着船上的红漆",
+        "手指像粗糙的树皮",
+        "老桨还沾着潮气，你弯腰系着布鞋",
+        "膝盖上裹满了泥",
+        "我站在身后，学着样子，慢慢深呼吸",
+        "你笑着抱我上船，把那张桨，递到我手里"
+      ]
+    },
+    {
+      "type": "verse",
+      "label": "VERSE 2",
+      "lines": [
+        "我好奇的，抚摸着感受着它的重量",
+        "和一块块老旧的斑",
+        "你说过了今天，你就要学会自己划了",
+        "它会带着你走",
+        "你轻轻哼着歌，像是告诉我别怕，要勇敢些",
+        "我听不清楚，但我永远记得"
+      ]
+    },
+    {
+      "type": "pre",
+      "label": "PRE-CHORUS",
+      "lines": [
+        "清晨的风吹过，有点凉",
+        "旧的船歌，你总哼得低沉",
+        "那些调子，我好像听过好多年",
+        "却从来没开口，跟着唱"
+      ]
+    },
+    {
+      "type": "chorus",
+      "label": "CHORUS",
+      "lines": [
+        "龙舟上的时间啊，一圈一圈晃",
+        "水花拍在脸上，咸咸的，有点烫",
+        "旧的桨，握在手里，越磨越亮",
+        "江风掠过耳畔过去的话不用讲",
+        "汗水湿了衣裳，又被太阳晒干",
+        "握桨的手掌换了一双又一双",
+        "笑着望那条江，往日的雾还没散",
+        "只有那首船歌静静飘荡水面上"
+      ]
+    },
+    {
+      "type": "verse",
+      "label": "VERSE 3",
+      "lines": [
+        "端午节的那天，鼓声会从水面传来",
+        "一直震动到胸口",
+        "爸爸会站在船头，用桨尖指着前方",
+        "坚定的大声喊，一二三",
+        "河边的老怀树，和模糊的风景",
+        "还是往日的样子，只有船上的人",
+        "换我站在船头，握着那张老桨"
+      ]
+    },
+    {
+      "type": "verse",
+      "label": "VERSE 4",
+      "lines": [
+        "我喊着一二三的节奏，划开浪花",
+        "就像当年教我的一样",
+        "手中同样的重量，那块老旧的斑",
+        "变得愈发光亮",
+        "时间在龙舟上，悄悄流淌",
+        "岁月里埋藏多少故事",
+        "好多事已经淡忘，但我永远记得"
+      ]
+    },
+    {
+      "type": "pre",
+      "label": "PRE-CHORUS（变奏）",
+      "lines": [
+        "清晨的风吹过，有点凉",
+        "旧的船歌，总是哼得低沉",
+        "那些调子，我已经唱过好几年",
+        "有个声音轻轻的，跟着唱"
+      ]
+    },
+    {
+      "type": "chorus",
+      "label": "CHORUS（Full Band）",
+      "lines": [
+        "龙舟上的时间啊，一圈一圈晃",
+        "水花拍在脸上，咸咸的，有点烫",
+        "旧的桨，握在手里，越磨越亮",
+        "江风掠过耳畔过去的话不用讲",
+        "汗水湿了衣裳，又被太阳晒干",
+        "握桨的手掌换了一双又一双",
+        "笑着望那条江，往日的雾还没散",
+        "只有那首船歌静静飘荡水面上",
+        "啊~ 啊~ 啊~ 啊~",
+        "龙舟上的时间啊，一圈一圈晃",
+        "水花拍在脸上，咸咸的，有点烫",
+        "旧的桨，握在手里，越磨越亮",
+        "江风掠过耳畔过去的话不用讲",
+        "汗水湿了衣裳，又被太阳晒干",
+        "握桨的手掌换了一双又一双",
+        "笑着望那条江，往日的雾还没散",
+        "只有那首船歌静静飘荡水面上"
+      ]
+    },
+    {
+      "type": "outro",
+      "label": "OUTRO",
+      "lines": ["（笛子渐弱，弦乐淡出，江水声）"]
+    }
+  ],
+
+  "prompt": {
+    "style": "Markante Dizi oder Synth-Flöte prägt das Stück mit Hauptmelodien, stark von chinesischer traditioneller Musik beeinflusst. Atmosphärische Synthesizer-Pads und Streicher erweitern den Raum. Elektronische Perkussion und Synthesizer-Bass legen das rhythmische Fundament. Gesamtstimmung: meditativ, spirituell, mit Weltmusik-Charakter.",
+    "metaTags": "genre: ethnic fusion, world music / mood: meditative, spiritual, traditional, atmospheric, cultural / theme: dragon boat, time, inheritance, family bond / vocal: Mandarin Chinese / speed: slow to medium / key: minor / instruments: Dizi, synthesizer, percussion, strings",
+    "negative": "avoid: pop-dance, electronic club, heavy bass drop, western rap, cheerful upbeat, major key dominance"
+  },
+
+  "meta": [
+    { "field": "歌曲标题", "value": "《龙舟上的时间》", "desc": "最终确定的歌曲名" },
+    { "field": "主题", "value": "龙舟传承·父子时光·乡土记忆", "desc": "核心表达主题" },
+    { "field": "情绪", "value": "meditative, nostalgic, spiritual", "desc": "整体歌曲情绪" },
+    { "field": "流派", "value": "民族融合 / World Music / Ethnic Fusion", "desc": "音乐流派分类" },
+    { "field": "BPM", "value": "74", "desc": "建议速度" },
+    { "field": "调式", "value": "小调为主，结尾转大调", "desc": "主调大小调" },
+    { "field": "时长", "value": "4:00 - 4:30", "desc": "预估时长" },
+    { "field": "目标平台", "value": "网易云音乐 / QQ音乐 / 抖音", "desc": "优先发布平台" },
+    { "field": "参考曲", "value": "《是妈妈是女儿》黄绮珊×希林娜依·高", "desc": "仿写参考曲目" }
+  ],
+
+  "cover": {
+    "main": "a cinematic cover image, calm river at dawn, a traditional wooden dragon boat sitting still on misty water, an elderly man and a young boy standing together at the bow holding a worn paddle, soft golden morning light cutting through atmospheric fog, warm nostalgic mood, Chinese rural riverside scene, cinematic aspect ratio 2:3, high detail, soft color palette of deep teals and warm amber --style raw --ar 2:3 --s 180 --q 2",
+    "alt": "minimalist album cover, abstract watercolor of a dragon boat silhouette on calm water, ink-wash style with warm amber and deep blue gradients, single golden light ray from above, melancholic yet hopeful atmosphere, no text, 2:3 aspect ratio --style raw --ar 2:3 --s 150 --q 2"
+  },
+
+  "copy": {
+    "shortDesc": "龙舟上的时间，一圈一圈晃。这首歌写给所有在河流边长大、又在城市里走远的人。爸爸教我划桨的那天，他没告诉我，这条江会流一辈子。",
+    "note": "写这首歌的时候，我想的是小时候站在江边，看爷爷和爸爸划船回来的样子。\n\n他们不会说什么大道理，就是把桨递给我，说：自己划。\n\n这首歌不煽情，不催泪。它只是说：有些东西，就是这样一代一代传下来的。",
+    "long": "【创作手记】\n\n这首歌来自一个很私人的画面——小时候站在河边，看爸爸或者爷爷把船划回来。\n\n他们不会说什么，就是把桨递给我，让我学着划。\n\n后来城市建起来了，河被填了，江被污染了，那条船也不知道去了哪里。但每次闻到端午节的艾草味，或者听到划船的号子声，那个画面就会回来。\n\n《龙舟上的时间》不是写给龙舟文化的。它是写给那种"我学会了，然后传下去"的传承感的。\n\n你接过那张旧桨的时候，上面已经磨得发亮了。\n\n这就是时间。\n\n制作：AIsharks Music\n作词：Lysa / 杰少"
+  }
+}
